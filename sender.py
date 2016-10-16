@@ -143,9 +143,7 @@ class Sender(object):
 
         response = requests.post(url=url, headers=headers, data=payload)
 
-        if response.status_code == 200:
-            print('- done, check the room with Cisco Spark client software')
-        else:
+        if response.status_code != 200:
             print("Sender received error code {}".format(response.status_code))
 
 
