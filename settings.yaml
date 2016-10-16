@@ -1,0 +1,19 @@
+# the port from which this bot is getting requests from the internet
+#
+port: 8080
+
+# the name of the Cisco Spark room handled by this bot
+#
+room: "Green Forge"
+
+# the token that has been created for this bot should normally be set in
+# the environment but you can override the configuration below
+#
+# CISCO_SPARK_PLUMBERY_BOT: "YWM2OEG4OGItNTQ5YS00MDU2LThkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtZWyY"
+
+# the parameters to use plumbery
+#
+plumbery:
+
+  fittings: /home/ubuntu/plumbery-contrib/fittings
+

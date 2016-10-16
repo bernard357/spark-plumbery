@@ -1,0 +1,4 @@
+bottle
+PyYAML
+requests
+requests_toolbelt
