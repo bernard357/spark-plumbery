@@ -275,9 +275,9 @@ def configure(name="settings.yaml"):
 #
 if __name__ == "__main__":
 
-    # read configuration file, look at the environment
+    # read configuration file, look at the environment, and update context
     #
-    settings = configure()
+    context.apply(configure())
 
     # create a clean environment for the demo
     #

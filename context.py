@@ -23,29 +23,50 @@ class Context(object):
     Credit: http://www.bogotobogo.com/python/Multithread/python_multithreading_Synchronization_Lock_Objects_Acquire_Release.php
     """
 
-    def __init__(self, values={}):
+    def __init__(self):
         self.lock = Lock()
-        self.values = values.copy()
-        logging.info('context {}, {}'.format(self.lock, self.values))
+        self.values = {}
+
+    def apply(self, settings={}):
+        """
+        Applies a block of settings
+        """
+
+        self.lock.acquire()
+        try:
+            for key in settings.keys():
+                self.values['general.'+key] = settings[key]
+        finally:
+            self.lock.release()
 
     def get(self, key, default=None):
+        """
+        Retrieves the value of one key
+        """
+
         self.lock.acquire()
         try:
             value = self.values.get(key, default)
-#            logging.debug('context:{}={}'.format(key, value))
         finally:
             self.lock.release()
             return value
 
     def set(self, key, value):
+        """
+        Remembers the value of one key
+        """
+
         self.lock.acquire()
         try:
             self.values[key] = value
-#            logging.debug('context:{}={}'.format(key, value))
         finally:
             self.lock.release()
 
     def increment(self, key, delta=1):
+        """
+        Increments a value
+        """
+
         self.lock.acquire()
         try:
             value = self.values.get(key, 0)
@@ -53,12 +74,15 @@ class Context(object):
                 value = 0
             value += delta
             self.values[key] = value
-#            logging.debug('context:{}={}'.format(key, value))
         finally:
             self.lock.release()
             return value
 
     def decrement(self, key, delta=1):
+        """
+        Decrements a value
+        """
+
         self.lock.acquire()
         try:
             value = self.values.get(key, 0)
@@ -66,7 +90,6 @@ class Context(object):
                 value = 0
             value -= delta
             self.values[key] = value
-#            logging.debug('context:{}={}'.format(key, value))
         finally:
             self.lock.release()
             return value

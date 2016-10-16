@@ -11,6 +11,24 @@ from context import Context
 
 class ContextTests(unittest.TestCase):
 
+    def test_apply(self):
+
+        logging.debug('*** Apply test ***')
+
+        context = Context()
+
+        self.assertEqual(context.get('general.port'), None)
+
+        settings = {
+            'port': 80,
+            'CISCO_SPARK_BTTN_BOT': 'who_knows',
+            }
+
+        context.apply(settings)
+
+        self.assertEqual(context.get('general.port'), 80)
+        self.assertEqual(context.get('general.CISCO_SPARK_BTTN_BOT'), 'who_knows')
+
     def test_store(self):
 
         logging.debug('*** Store test ***')
@@ -74,9 +92,9 @@ class ContextTests(unittest.TestCase):
         def worker(id, context):
             for i in range(4):
                 r = random.random()
-                logging.debug('worker %d:sleeping %0.02f', id, r)
                 time.sleep(r)
-                context.increment('gauge')
+                value = context.increment('gauge')
+                logging.debug('worker %d:counter=%d', id, value)
             logging.debug('worker %d:done', id)
 
         logging.debug('Creating a counter')
