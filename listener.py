@@ -24,12 +24,9 @@ class Listener(object):
     Acknowledges commands and feeds the worker
     """
 
-    def __init__(self, ears, inbox, mouth):
+    def __init__(self, ears, shell):
         self.ears = ears
-        self.inbox = inbox
-        self.mouth = mouth
-        logging.debug('listener {} {} {}'.format(
-            self.ears, self.inbox, self.mouth))
+        self.shell = shell
 
     def work(self, context):
         print("Starting listener")
@@ -74,16 +71,26 @@ class Listener(object):
 
         # sanity check
         #
-        if not isinstance(item, dict):
-            print("- not for me, thrown away")
+        if not isinstance(item, dict) or 'personId' not in item.keys():
+            print("- not a dict, thrown away")
             return
+
+        # my own messages
+        #
+        if item['personId'] == self.context.get('general.bot_id'):
+            return
+
+#        print(item)
 
         input = item.get('text', '')
-        if not input.startswith('/plumby '):
+
+        bot = self.context.get('general.bot')
+        if not input.startswith(bot):
             print("- not for me, thrown away")
             return
 
-        line = input[len('/plumby '):]
+        line = input[len(bot):].strip()
+
         tokens = line.split(' ')
         verb = tokens.pop(0)
         if len(tokens) > 0:
@@ -91,16 +98,13 @@ class Listener(object):
         else:
             parameters = ''
 
-        if verb.lower() not in ['use', 'deploy', 'dispose']:
+        if verb.lower() not in self.shell.list_verbs():
             print("- unknown command")
             self.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
             return
 
         print("- processing command '{}'".format(verb))
-        if verb == 'use':
-            self.context.set('listener.use', parameters)
-            self.mouth.put("This is well-noted")
-            return
 
-        self.inbox.put((verb, parameters))
-        self.mouth.put("Ok, working on it")
+        method = getattr(self.shell, 'do_'+verb, None)
+        if callable(method):
+            method(parameters)
