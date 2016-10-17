@@ -45,12 +45,12 @@ class Shell(object):
             ]
 
     def do_deploy(self, parameters):
+        self.mouth.put("Deployment has been triggered")
         self.inbox.put(('deploy', parameters))
-        self.mouth.put("Ok, working on it")
 
     def do_dispose(self, parameters):
+        self.mouth.put("We are starting to stop and destroy resources in the cloud")
         self.inbox.put(('dispose', parameters))
-        self.mouth.put("Ok, working on it")
 
     def do_help(self, parameters):
         self.mouth.put({'markdown': help_markdown})
@@ -64,5 +64,3 @@ class Shell(object):
     def do_use(self, parameters):
         self.context.set('general.fittings', parameters)
         self.mouth.put("This is well-noted")
-
-
