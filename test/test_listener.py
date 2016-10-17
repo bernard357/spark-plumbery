@@ -23,16 +23,16 @@ class ListenerTests(unittest.TestCase):
 
         logging.debug('*** Static test ***')
 
-        context = Context()
-
         ears = Queue()
         inbox = Queue()
         mouth = Queue()
 
+        context = Context()
         shell = Shell(context, inbox, mouth)
         listener = Listener(ears, shell)
 
         listener_thread = Thread(target=listener.work, args=(context,))
+        listener_thread.setDaemon(True)
         listener_thread.start()
 
         listener_thread.join(1.0)
@@ -47,8 +47,6 @@ class ListenerTests(unittest.TestCase):
     def test_dynamic(self):
 
         logging.debug('*** Dynamic test ***')
-
-        context = Context()
 
         ears = Queue()
 
@@ -112,17 +110,11 @@ class ListenerTests(unittest.TestCase):
         inbox = Queue()
         mouth = Queue()
 
+        context = Context()
         shell = Shell(context, inbox, mouth)
         listener = Listener(ears, shell)
 
-        listener_thread = Thread(target=listener.work, args=(context,))
-        listener_thread.start()
-
-        listener_thread.join(1.0)
-        if listener_thread.isAlive():
-            logging.debug('Stopping listener')
-            context.set('general.switch', 'off')
-            listener_thread.join()
+        listener.work(context)
 
         self.assertEqual(context.get('listener.counter'), 4)
         self.assertEqual(ears.qsize(), 0)

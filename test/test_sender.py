@@ -23,11 +23,12 @@ class SenderTests(unittest.TestCase):
         logging.debug('*** Stop test ***')
 
         mouth = Queue()
-        sender = Sender(mouth)
 
         context = Context()
+        sender = Sender(mouth)
 
         sender_thread = Thread(target=sender.work, args=(context,))
+        sender_thread.setDaemon(True)
         sender_thread.start()
 
         sender_thread.join(1.0)
@@ -48,21 +49,13 @@ class SenderTests(unittest.TestCase):
         mouth.put('world')
         self.assertEqual(mouth.qsize(), 2)
 
-        sender = Sender(mouth)
-#        sender.post_update = MagicMock()
-
         context = Context()
         context.set('general.CISCO_SPARK_PLUMBERY_BOT', 'garbage')
         context.set('general.room_id', 'fake')
 
-        sender_thread = Thread(target=sender.work, args=(context,))
-        sender_thread.start()
-
-        sender_thread.join(4.0)
-        if sender_thread.isAlive():
-            logging.debug('Stopping sender')
-            context.set('general.switch', 'off')
-            sender_thread.join()
+        sender = Sender(mouth)
+#        sender.post_update = MagicMock()
+        sender.work(context)
 
         self.assertEqual(mouth.qsize(), 0)
 

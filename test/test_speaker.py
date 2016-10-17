@@ -23,11 +23,12 @@ class SpeakerTests(unittest.TestCase):
 
         outbox = Queue()
         mouth = Queue()
-        speaker = Speaker(outbox, mouth)
 
         context = Context()
+        speaker = Speaker(outbox, mouth)
 
         speaker_thread = Thread(target=speaker.work, args=(context,))
+        speaker_thread.setDaemon(True)
         speaker_thread.start()
 
         speaker_thread.join(1.0)
@@ -51,18 +52,9 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         self.assertEqual(mouth.qsize(), 0)
 
-        speaker = Speaker(outbox, mouth)
-
         context = Context()
-
-        speaker_thread = Thread(target=speaker.work, args=(context,))
-        speaker_thread.start()
-
-        speaker_thread.join(1.0)
-        if speaker_thread.isAlive():
-            logging.debug('Stopping speaker')
-            context.set('general.switch', 'off')
-            speaker_thread.join()
+        speaker = Speaker(outbox, mouth)
+        speaker.work(context)
 
         self.assertEqual(mouth.qsize(), 2)
 

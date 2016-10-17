@@ -23,11 +23,12 @@ class WorkerTests(unittest.TestCase):
 
         inbox = Queue()
         outbox = Queue()
-        worker = Worker(inbox, outbox)
 
         context = Context()
+        worker = Worker(inbox, outbox)
 
         worker_thread = Thread(target=worker.work, args=(context,))
+        worker_thread.setDaemon(True)
         worker_thread.start()
 
         worker_thread.join(1.0)
@@ -52,20 +53,13 @@ class WorkerTests(unittest.TestCase):
         outbox = Queue()
         self.assertEqual(outbox.qsize(), 0)
 
+        context = Context()
         worker = Worker(inbox, outbox)
 
-        context = Context()
+        worker.work(context)
 
-        worker_thread = Thread(target=worker.work, args=(context,))
-        worker_thread.start()
-
-        worker_thread.join(7.0)
-        if worker_thread.isAlive():
-            logging.debug('Stopping worker')
-            context.set('general.switch', 'off')
-            worker_thread.join()
-
-        self.assertEqual(outbox.qsize(), 9)
+        self.assertEqual(inbox.qsize(), 0)
+        self.assertTrue(outbox.qsize() > 2)
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)
