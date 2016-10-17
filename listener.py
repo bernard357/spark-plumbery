@@ -75,6 +75,11 @@ class Listener(object):
             print("- not a dict, thrown away")
             return
 
+        input = item.get('text', '')
+        if input is None:
+            print("- no input in this item, thrown away")
+            return
+
         # my own messages
         #
         if item['personId'] == self.context.get('general.bot_id'):
@@ -82,10 +87,14 @@ class Listener(object):
 
 #        print(item)
 
-        input = item.get('text', '')
+        # we can be called with 'plumby ...' or '@plumby ...' or '/plumby ...'
+        #
+        if input[0] in ['@', '/']:
+            input = input[1:]
 
-        bot = self.context.get('general.bot')
+        bot = self.context.get('general.bot', 'plumby')
         if not input.startswith(bot):
+            print("- {}".format(input))
             print("- not for me, thrown away")
             return
 
