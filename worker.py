@@ -17,6 +17,7 @@ import logging
 from Queue import Empty
 import random
 import time
+from plumbery.engine import PlumberyEngine
 
 class Worker(object):
     """
@@ -56,20 +57,25 @@ class Worker(object):
 
         (verb, parameters) = item
 
-        if verb == 'deploy':
-            self.outbox.put('Ok, deploying right now...')
-        elif verb == 'dispose':
-            self.outbox.put('Ok, disposing resources right now...')
-        else:
-            self.outbox.put('Still scratching my head...')
+        try:
+
+            fittings = self.context.get('general.fittings', '.')+'/fittings.yaml'
+            print('- reading {}'.format(fittings))
+
+            print('- loading plumbery engine')
+            engine = PlumberyEngine(fittings)
+
+        except Exception as feedback:
+            print("Error while reading fittings plan")
+            self.outbox.put("Error while reading fittings plan")
             return
 
-        for i in range(2):
-            self.outbox.put('Currently at step {}...'.format(i))
-            r = random.random()
-            time.sleep(r)
+        try:
+            engine.do(verb)
 
-        if verb == 'deploy':
-            self.outbox.put('The deployment has been terminated')
-        elif verb == 'dispose':
-            self.outbox.put('All resources have been destroyed')
+            self.outbox.put(engine.document_elapsed())
+
+        except Exception as feedback:
+            print("Unable to do '{}'".format(verb))
+            self.outbox.put("Unable to do '{}'".format(verb))
+            return
