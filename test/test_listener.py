@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 from context import Context
 from listener import Listener
+from shell import Shell
 
 
 class ListenerTests(unittest.TestCase):
@@ -22,12 +23,14 @@ class ListenerTests(unittest.TestCase):
 
         logging.debug('*** Static test ***')
 
+        context = Context()
+
         ears = Queue()
         inbox = Queue()
         mouth = Queue()
-        listener = Listener(ears, inbox, mouth)
 
-        context = Context()
+        shell = Shell(context, inbox, mouth)
+        listener = Listener(ears, shell)
 
         listener_thread = Thread(target=listener.work, args=(context,))
         listener_thread.start()
@@ -44,6 +47,8 @@ class ListenerTests(unittest.TestCase):
     def test_dynamic(self):
 
         logging.debug('*** Dynamic test ***')
+
+        context = Context()
 
         ears = Queue()
 
@@ -106,9 +111,9 @@ class ListenerTests(unittest.TestCase):
         self.assertEqual(ears.qsize(), 4)
         inbox = Queue()
         mouth = Queue()
-        listener = Listener(ears, inbox, mouth)
 
-        context = Context()
+        shell = Shell(context, inbox, mouth)
+        listener = Listener(ears, shell)
 
         listener_thread = Thread(target=listener.work, args=(context,))
         listener_thread.start()

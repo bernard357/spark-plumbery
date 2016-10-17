@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 from context import Context
 from listener import Listener
+from shell import Shell
 from worker import Worker
 from speaker import Speaker
 from sender import Sender
@@ -25,17 +26,18 @@ class CompositeTests(unittest.TestCase):
 
         logging.debug('*** Static test ***')
 
+        context = Context()
+
         ears = Queue()
         inbox = Queue()
         outbox = Queue()
         mouth = Queue()
 
-        listener = Listener(ears, inbox, mouth)
+        shell = Shell(context, inbox, mouth)
+        listener = Listener(ears, shell)
         worker = Worker(inbox, outbox)
         speaker = Speaker(outbox, mouth)
         sender = Sender(mouth)
-
-        context = Context()
 
         sender_thread = Thread(target=sender.work, args=(context,))
         sender_thread.start()
@@ -67,18 +69,19 @@ class CompositeTests(unittest.TestCase):
 
         logging.debug('*** Dynamic test ***')
 
+        context = Context()
+
         ears = Queue()
         inbox = Queue()
         outbox = Queue()
         mouth = Queue()
 
-        listener = Listener(ears, inbox, mouth)
+        shell = Shell(context, inbox, mouth)
+        listener = Listener(ears, shell)
         worker = Worker(inbox, outbox)
         speaker = Speaker(outbox, mouth)
         sender = Sender(mouth)
         sender.post_update = MagicMock()
-
-        context = Context()
 
         sender_thread = Thread(target=sender.work, args=(context,))
         sender_thread.setDaemon(True)
