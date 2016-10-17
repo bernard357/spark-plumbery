@@ -45,11 +45,11 @@ class Shell(object):
             ]
 
     def do_deploy(self, parameters):
-        self.mouth.put("Deployment has been triggered")
+        self.mouth.put("Ok, working on it")
         self.inbox.put(('deploy', parameters))
 
     def do_dispose(self, parameters):
-        self.mouth.put("We are starting to stop and destroy resources in the cloud")
+        self.mouth.put("Ok, working on it")
         self.inbox.put(('dispose', parameters))
 
     def do_help(self, parameters):
