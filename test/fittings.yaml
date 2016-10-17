@@ -1,0 +1,21 @@
+---
+safeMode: true
+---
+
+locationId: EU6
+
+blueprints:
+
+  - first:
+
+      domain:
+        name: MyDataCentre
+        ipv4: 2
+
+      ethernet:
+        name: MyNetwork
+        subnet: 10.0.0.0
+
+      nodes:
+        - MyServer:
+            appliance: 'Ubuntu 14'
