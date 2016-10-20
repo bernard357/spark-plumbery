@@ -30,6 +30,22 @@ class Worker(object):
         self.outbox = outbox
         logging.debug('worker {}, {}'.format(self.inbox, self.outbox))
 
+        class OutboxHandler(logging.Handler):
+
+            def __init__(self, outbox):
+                self.level = logging.INFO
+                self.filters = ()
+                self.lock = False
+                self.formatter = False
+                self.outbox = outbox
+
+            def emit(self, record):
+                log_entry = self.format(record)
+                self.outbox.put(log_entry)
+
+        plogging.addHandler(OutboxHandler(outbox))
+        plogging.setLevel(logging.INFO)
+
     def work(self, context):
         print("Starting worker")
 
