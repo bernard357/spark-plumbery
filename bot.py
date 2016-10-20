@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from gevent import monkey; monkey.patch_all()
 import json
 import logging
 import os
@@ -375,5 +376,5 @@ if __name__ == "__main__":
     run(host='0.0.0.0',
         port=context.get('general.port'),
         debug=context.get('general.DEBUG'),
-        server=os.environ.get('SERVER', "auto"))
+        server=os.environ.get('SERVER', 'gevent'))
 
