@@ -70,6 +70,8 @@ class CompositeTests(unittest.TestCase):
         logging.debug('*** Dynamic test ***')
 
         context = Context()
+        context.set('general.fittings',
+                         os.path.abspath(os.path.dirname(__file__)))
 
         ears = Queue()
         inbox = Queue()
@@ -169,8 +171,8 @@ class CompositeTests(unittest.TestCase):
 
         self.assertEqual(context.get('listener.counter', 0), 5)
         self.assertEqual(context.get('worker.counter', 0), 1)
-        self.assertEqual(context.get('speaker.counter', 0), 4)
-        self.assertEqual(context.get('sender.counter', 0), 6)
+        self.assertEqual(context.get('speaker.counter', 0), 1)
+        self.assertEqual(context.get('sender.counter', 0), 3)
 
 
 if __name__ == '__main__':

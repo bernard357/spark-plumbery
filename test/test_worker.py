@@ -55,6 +55,9 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual(outbox.qsize(), 0)
 
         context = Context()
+        context.set('general.fittings',
+                         os.path.abspath(os.path.dirname(__file__)))
+
         worker = Worker(inbox, outbox)
 
         worker.work(context)
