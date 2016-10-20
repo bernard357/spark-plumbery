@@ -85,6 +85,7 @@ class Listener(object):
         # my own messages
         #
         if item['personId'] == self.context.get('general.bot_id'):
+            print("- sent by me, thrown away")
             return
 
 #        print(item)
