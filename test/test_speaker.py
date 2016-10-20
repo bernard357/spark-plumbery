@@ -47,7 +47,8 @@ class SpeakerTests(unittest.TestCase):
         outbox = Queue()
         outbox.put('hello')
         outbox.put('world')
-        self.assertEqual(outbox.qsize(), 2)
+        outbox.put(Exception('EOQ'))
+        self.assertEqual(outbox.qsize(), 3)
 
         mouth = Queue()
         self.assertEqual(mouth.qsize(), 0)

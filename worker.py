@@ -18,6 +18,7 @@ from Queue import Empty
 import random
 import time
 from plumbery.engine import PlumberyEngine
+from plumbery.plogging import plogging
 
 class Worker(object):
     """
@@ -38,6 +39,8 @@ class Worker(object):
         while self.context.get('general.switch', 'on') == 'on':
             try:
                 item = self.inbox.get(True, 0.1)
+                if isinstance(item, Exception):
+                    break
                 counter = self.context.increment('worker.counter')
                 self.process(item, counter)
             except Empty:

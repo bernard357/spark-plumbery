@@ -48,7 +48,8 @@ class WorkerTests(unittest.TestCase):
         inbox.put(('deploy', ''))
         inbox.put(('dispose', ''))
         inbox.put(('unknownCommand', ''))
-        self.assertEqual(inbox.qsize(), 3)
+        inbox.put(Exception('EOQ'))
+        self.assertEqual(inbox.qsize(), 4)
 
         outbox = Queue()
         self.assertEqual(outbox.qsize(), 0)
@@ -58,8 +59,11 @@ class WorkerTests(unittest.TestCase):
 
         worker.work(context)
 
+        self.assertEqual(context.get('worker.counter'), 3)
         self.assertEqual(inbox.qsize(), 0)
         self.assertTrue(outbox.qsize() > 2)
+
+        logging.debug('{} items in outbox'.format(outbox.qsize()))
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)

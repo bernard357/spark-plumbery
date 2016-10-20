@@ -47,7 +47,8 @@ class SenderTests(unittest.TestCase):
         mouth = Queue()
         mouth.put('hello')
         mouth.put('world')
-        self.assertEqual(mouth.qsize(), 2)
+        mouth.put(Exception('EOQ'))
+        self.assertEqual(mouth.qsize(), 3)
 
         context = Context()
         context.set('general.CISCO_SPARK_PLUMBERY_BOT', 'garbage')

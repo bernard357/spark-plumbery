@@ -37,6 +37,8 @@ class Speaker(object):
         while self.context.get('general.switch', 'on') == 'on':
             try:
                 item = self.outbox.get(True, 0.1)
+                if isinstance(item, Exception):
+                    break
                 counter = self.context.increment('speaker.counter')
                 self.process(item, counter)
             except Empty:

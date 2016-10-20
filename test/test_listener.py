@@ -106,7 +106,9 @@ class ListenerTests(unittest.TestCase):
               "mentionedPeople" : [ "Y2lzY29zcGFyazovL3VzL1BFT1BMRS8yNDlmNzRkOS1kYjhhLTQzY2EtODk2Yi04NzllZDI0MGFjNTM", "Y2lzY29zcGFyazovL3VzL1BFT1BMRS83YWYyZjcyYy0xZDk1LTQxZjAtYTcxNi00MjlmZmNmYmM0ZDg" ]
             })
 
-        self.assertEqual(ears.qsize(), 4)
+        ears.put(Exception('EOQ'))
+
+        self.assertEqual(ears.qsize(), 5)
         inbox = Queue()
         mouth = Queue()
 

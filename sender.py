@@ -38,6 +38,8 @@ class Sender(object):
         while self.context.get('general.switch', 'on') == 'on':
             try:
                 item = self.mouth.get(True, 0.1)
+                if isinstance(item, Exception):
+                    break
                 counter = self.context.increment('sender.counter')
                 self.process(item, counter)
             except Empty:
