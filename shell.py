@@ -20,7 +20,7 @@ help_markdown = """
 Some commands that may prove useful:
 * list templates: @plumby list
 * use template: @plumby use analytics/hadoop-cluster
-* show template: @plumby status
+* show status: @plumby status
 * deploy template: @plumby deploy
 * destroy template: @plumby dispose
 """
