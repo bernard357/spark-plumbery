@@ -45,24 +45,24 @@ class Shell(object):
             'use',
             ]
 
-    def do_deploy(self, parameters):
+    def do_deploy(self, parameters=None):
         if not self.context.get('worker.busy', False):
             self.mouth.put("Ok, working on it")
         else:
             self.mouth.put("Ok, will work on it as soon as possible")
         self.inbox.put(('deploy', parameters))
 
-    def do_dispose(self, parameters):
+    def do_dispose(self, parameters=None):
         if not self.context.get('worker.busy', False):
             self.mouth.put("Ok, working on it")
         else:
             self.mouth.put("Ok, will work on it as soon as possible")
         self.inbox.put(('dispose', parameters))
 
-    def do_help(self, parameters):
+    def do_help(self, parameters=None):
         self.mouth.put({'markdown': help_markdown})
 
-    def do_list(self, parameters):
+    def do_list(self, parameters=None):
 
         root =  self.context.get('fittings', '.')
         print('- listing fittings in {}'.format(root))
@@ -82,7 +82,7 @@ class Shell(object):
                     pass
         print('- found {} fittings'.format(count))
 
-    def do_status(self, parameters):
+    def do_status(self, parameters=None):
         self.mouth.put("Using {}".format(self.context.get('general.fittings')))
         if self.context.get('worker.busy', False):
             self.mouth.put("Plumbery is busy")

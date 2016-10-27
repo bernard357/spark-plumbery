@@ -66,7 +66,7 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
-        shell.do_help('abcdef')
+        shell.do_help()
         self.assertEqual(mouth.qsize(), 1)
         self.assertEqual(inbox.qsize(), 0)
 
@@ -77,7 +77,7 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
-        shell.do_list('.')
+        shell.do_list()
         self.assertEqual(mouth.qsize(), 5)
         self.assertEqual(inbox.qsize(), 0)
 
@@ -88,7 +88,7 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
-        shell.do_status('abcdef')
+        shell.do_status()
         self.assertEqual(mouth.qsize(), 1)
         self.assertEqual(inbox.qsize(), 0)
 
