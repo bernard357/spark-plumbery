@@ -112,7 +112,7 @@ class Listener(object):
 
         if verb.lower() not in self.shell.list_verbs():
             print("- unknown command")
-            self.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
+            self.shell.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
             return
 
         print("- processing command '{}'".format(verb))
