@@ -69,6 +69,8 @@ def from_spark():
 
     try:
 
+        print('Receiving data from webhook')
+
         # step 1 -- we got message id, but no content
         #
         message_id = request.json['data']['id']
@@ -238,7 +240,7 @@ def register_hook(context):
 
     url = 'https://api.ciscospark.com/v1/webhooks'
     headers = {'Authorization': 'Bearer '+bearer}
-    payload = {'name': 'my-very-first-webhook',
+    payload = {'name': 'controller-webhook',
                'resource': 'messages',
                'event': 'created',
                'filter': 'roomId='+room_id,
@@ -287,13 +289,6 @@ def configure(name="settings.yaml"):
     if "webhook" not in settings:
         logging.error("Missing webhook: configuration information")
         sys.exit(1)
-
-    if "plumbery" not in settings:
-        logging.error("Missing plumbery: configuration information")
-        sys.exit(1)
-
-    if "fittings" not in settings:
-        settings['fittings'] = 'example/first'
 
     if len(sys.argv) > 1:
         try:

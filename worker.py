@@ -78,7 +78,7 @@ class Worker(object):
 
         try:
 
-            fittings = self.context.get('general.fittings', '.')+'/fittings.yaml'
+            fittings = self.context.get('fittings', '.')+'/fittings.yaml'
             print('- reading {}'.format(fittings))
 
             print('- loading plumbery engine')
