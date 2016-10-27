@@ -45,11 +45,17 @@ class Shell(object):
             ]
 
     def do_deploy(self, parameters):
-        self.mouth.put("Ok, working on it")
+        if not self.context.get('worker.busy', False):
+            self.mouth.put("Ok, working on it")
+        else:
+            self.mouth.put("Ok, will work on it as soon as possible")
         self.inbox.put(('deploy', parameters))
 
     def do_dispose(self, parameters):
-        self.mouth.put("Ok, working on it")
+        if not self.context.get('worker.busy', False):
+            self.mouth.put("Ok, working on it")
+        else:
+            self.mouth.put("Ok, will work on it as soon as possible")
         self.inbox.put(('dispose', parameters))
 
     def do_help(self, parameters):
@@ -60,6 +66,8 @@ class Shell(object):
 
     def do_status(self, parameters):
         self.mouth.put("Using {}".format(self.context.get('general.fittings')))
+        if self.context.get('worker.busy', False):
+            self.mouth.put("Plumbery is busy")
 
     def do_use(self, parameters):
         self.context.set('general.fittings', parameters)

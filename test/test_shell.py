@@ -24,10 +24,19 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
-        shell.do_deploy('1234')
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(inbox.qsize(), 1)
-        self.assertEqual(inbox.get(), ('deploy', '1234'))
+        shell.do_deploy('123')
+        context.set('worker.busy', True)
+        shell.do_deploy('456')
+        context.set('worker.busy', False)
+        shell.do_deploy('789')
+        self.assertEqual(mouth.qsize(), 3)
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(inbox.qsize(), 3)
+        self.assertEqual(inbox.get(), ('deploy', '123'))
+        self.assertEqual(inbox.get(), ('deploy', '456'))
+        self.assertEqual(inbox.get(), ('deploy', '789'))
 
     def test_do_dispose(self):
 
@@ -36,10 +45,19 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
-        shell.do_dispose('abcdef')
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(inbox.qsize(), 1)
-        self.assertEqual(inbox.get(), ('dispose', 'abcdef'))
+        shell.do_dispose('123')
+        context.set('worker.busy', True)
+        shell.do_dispose('456')
+        context.set('worker.busy', False)
+        shell.do_dispose('789')
+        self.assertEqual(mouth.qsize(), 3)
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(inbox.qsize(), 3)
+        self.assertEqual(inbox.get(), ('dispose', '123'))
+        self.assertEqual(inbox.get(), ('dispose', '456'))
+        self.assertEqual(inbox.get(), ('dispose', '789'))
 
     def test_do_help(self):
 

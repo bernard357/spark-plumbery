@@ -50,17 +50,22 @@ class Worker(object):
         print("Starting worker")
 
         self.context = context
-
         self.context.set('worker.counter', 0)
+        self.context.set('worker.busy', False)
+
         while self.context.get('general.switch', 'on') == 'on':
             try:
                 item = self.inbox.get(True, 0.1)
                 if isinstance(item, Exception):
                     break
                 counter = self.context.increment('worker.counter')
+                self.context.set('worker.busy', True)
                 self.process(item, counter)
             except Empty:
                 pass
+
+            self.context.set('worker.busy', False)
+            self.inbox.task_done()
 
     def process(self, item, counter):
         """
