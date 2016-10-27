@@ -18,11 +18,13 @@ import os
 
 help_markdown = """
 Some commands that may prove useful:
-* list templates: @plumby list
-* use template: @plumby use analytics/hadoop-cluster
-* show status: @plumby status
-* deploy template: @plumby deploy
-* destroy template: @plumby dispose
+- show status: @plumby status
+- list templates: @plumby list
+- use template: @plumby use analytics/hadoop-cluster
+- deploy template: @plumby deploy
+- stop servers: @plumby stop
+- start servers: @plumby start
+- destroy template: @plumby dispose
 """
 
 class Shell(object):
@@ -41,7 +43,9 @@ class Shell(object):
             'dispose',
             'help',
             'list',
+            'start',
             'status',
+            'stop',
             'use',
             ]
 
@@ -82,10 +86,24 @@ class Shell(object):
                     pass
         print('- found {} fittings'.format(count))
 
+    def do_start(self, parameters=None):
+        if not self.context.get('worker.busy', False):
+            self.mouth.put("Ok, working on it")
+        else:
+            self.mouth.put("Ok, will work on it as soon as possible")
+        self.inbox.put(('start', parameters))
+
     def do_status(self, parameters=None):
         self.mouth.put("Using {}".format(self.context.get('general.fittings')))
         if self.context.get('worker.busy', False):
             self.mouth.put("Plumbery is busy")
+
+    def do_stop(self, parameters=None):
+        if not self.context.get('worker.busy', False):
+            self.mouth.put("Ok, working on it")
+        else:
+            self.mouth.put("Ok, will work on it as soon as possible")
+        self.inbox.put(('stop', parameters))
 
     def do_use(self, parameters):
         self.context.set('general.fittings', parameters)
