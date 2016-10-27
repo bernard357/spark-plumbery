@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+import os
 
 help_markdown = """
 Some commands that may prove useful:
@@ -62,7 +63,24 @@ class Shell(object):
         self.mouth.put({'markdown': help_markdown})
 
     def do_list(self, parameters):
-        self.mouth.put("Sorry, this has not been implemented yet")
+
+        root =  self.context.get('fittings', '.')
+        print('- listing fittings in {}'.format(root))
+        self.mouth.put("You can use any of following fittings:")
+        count = 0
+        for category in os.listdir(root):
+            c_path = os.path.join(root,category)
+            if not os.path.isdir(c_path):
+                continue
+            for fittings in os.listdir(c_path):
+                f_path = os.path.join(c_path,fittings)
+                try:
+                    with open(os.path.join(f_path, 'fittings.yaml'), 'r') as f:
+                        count += 1
+                        self.mouth.put("- {}".format(category+'/'+fittings))
+                except:
+                    pass
+        print('- found {} fittings'.format(count))
 
     def do_status(self, parameters):
         self.mouth.put("Using {}".format(self.context.get('general.fittings')))

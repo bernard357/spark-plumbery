@@ -77,8 +77,8 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
-        shell.do_list('abcdef')
-        self.assertEqual(mouth.qsize(), 1)
+        shell.do_list('.')
+        self.assertEqual(mouth.qsize(), 5)
         self.assertEqual(inbox.qsize(), 0)
 
     def test_do_status(self):
