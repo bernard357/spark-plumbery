@@ -24,8 +24,9 @@ Some commands that may prove useful:
 - deploy template: @plumby deploy
 - stop servers: @plumby stop
 - start servers: @plumby start
-- destroy template: @plumby dispose
+- destroy resources: @plumby dispose
 - prepare servers: @plumby prepare
+- get information: @plumby information
 """
 
 class Shell(object):
@@ -37,19 +38,6 @@ class Shell(object):
         self.context = context
         self.inbox = inbox
         self.mouth = mouth
-
-    def list_verbs(self):
-        return [
-            'deploy',
-            'dispose',
-            'help',
-            'list',
-            'prepare',
-            'start',
-            'status',
-            'stop',
-            'use',
-            ]
 
     def do_deploy(self, parameters=None):
         if not self.context.get('worker.busy', False):
@@ -64,6 +52,13 @@ class Shell(object):
         else:
             self.mouth.put("Ok, will work on it as soon as possible")
         self.inbox.put(('dispose', parameters))
+
+    def do_information(self, parameters=None):
+        if not self.context.get('worker.busy', False):
+            self.mouth.put("Ok, working on it")
+        else:
+            self.mouth.put("Ok, will work on it as soon as possible")
+        self.inbox.put(('information', parameters))
 
     def do_help(self, parameters=None):
         self.mouth.put({'markdown': help_markdown})

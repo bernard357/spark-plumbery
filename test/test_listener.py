@@ -123,6 +123,38 @@ class ListenerTests(unittest.TestCase):
         self.assertEqual(inbox.qsize(), 1)
         self.assertEqual(mouth.qsize(), 2)
 
+    def test_vocabulary(self):
+
+        logging.debug('*** Vocabulary test ***')
+
+        ears = Queue()
+        inbox = Queue()
+        mouth = Queue()
+
+        context = Context()
+        shell = Shell(context, inbox, mouth)
+        listener = Listener(ears, shell)
+
+        listener.do('*unknown*')
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get(), "Sorry, I do not know how to handle '*unknown*'")
+        self.assertEqual(inbox.qsize(), 0)
+
+        listener.do('help')
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertTrue(isinstance(mouth.get(), dict))
+        self.assertEqual(inbox.qsize(), 0)
+
+        listener.do('use analytics/hadoop-cluster')
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get(), "This is well-noted")
+        self.assertEqual(inbox.qsize(), 0)
+
+        listener.do('use unknown/template')
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get(), "This is well-noted")
+        self.assertEqual(inbox.qsize(), 0)
+
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)
     sys.exit(unittest.main())

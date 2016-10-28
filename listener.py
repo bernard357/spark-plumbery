@@ -103,6 +103,21 @@ class Listener(object):
 
         line = input[len(bot):].strip()
 
+        self.do(line)
+
+    def do(self, line):
+        """
+        Handles one line of text
+
+        This function uses the first token as a verb, and looks for a method
+        of the same name in the shell.
+
+        For example, for the command `use analytics/hadoop-cluster`, the function
+        will invoke `shell.do_use('analytics/hadoop-cluster')`.
+
+        If the command does not exist, an error message will be given back to
+        the end user.
+        """
         tokens = line.split(' ')
         verb = tokens.pop(0)
         if len(tokens) > 0:
@@ -110,13 +125,15 @@ class Listener(object):
         else:
             parameters = ''
 
-        if verb.lower() not in self.shell.list_verbs():
+        try:
+            method = getattr(self.shell, 'do_'+verb, None)
+            if callable(method):
+                print("- processing command '{}'".format(verb))
+                method(parameters)
+            else:
+                print("- invalid command")
+                self.shell.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
+
+        except:
             print("- unknown command")
             self.shell.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
-            return
-
-        print("- processing command '{}'".format(verb))
-
-        method = getattr(self.shell, 'do_'+verb, None)
-        if callable(method):
-            method(parameters)
