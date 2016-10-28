@@ -59,6 +59,27 @@ class SpeakerTests(unittest.TestCase):
         self.assertEqual(inbox.get(), ('dispose', '456'))
         self.assertEqual(inbox.get(), ('dispose', '789'))
 
+    def test_do_information(self):
+
+        context = Context()
+        inbox = Queue()
+        mouth = Queue()
+        shell = Shell(context, inbox, mouth)
+
+        shell.do_information('123')
+        context.set('worker.busy', True)
+        shell.do_information('456')
+        context.set('worker.busy', False)
+        shell.do_information('789')
+        self.assertEqual(mouth.qsize(), 3)
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(inbox.qsize(), 3)
+        self.assertEqual(inbox.get(), ('information', '123'))
+        self.assertEqual(inbox.get(), ('information', '456'))
+        self.assertEqual(inbox.get(), ('information', '789'))
+
     def test_do_help(self):
 
         context = Context()
@@ -101,6 +122,27 @@ class SpeakerTests(unittest.TestCase):
         self.assertEqual(inbox.get(), ('prepare', '123'))
         self.assertEqual(inbox.get(), ('prepare', '456'))
         self.assertEqual(inbox.get(), ('prepare', '789'))
+
+    def test_do_refresh(self):
+
+        context = Context()
+        inbox = Queue()
+        mouth = Queue()
+        shell = Shell(context, inbox, mouth)
+
+        shell.do_refresh('123')
+        context.set('worker.busy', True)
+        shell.do_refresh('456')
+        context.set('worker.busy', False)
+        shell.do_refresh('789')
+        self.assertEqual(mouth.qsize(), 3)
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(inbox.qsize(), 3)
+        self.assertEqual(inbox.get(), ('refresh', '123'))
+        self.assertEqual(inbox.get(), ('refresh', '456'))
+        self.assertEqual(inbox.get(), ('refresh', '789'))
 
     def test_do_start(self):
 

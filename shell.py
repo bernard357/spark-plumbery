@@ -26,6 +26,7 @@ Some commands that may prove useful:
 - start servers: @plumby start
 - destroy resources: @plumby dispose
 - prepare servers: @plumby prepare
+- refresh servers: @plumby refresh
 - get information: @plumby information
 """
 
@@ -92,6 +93,13 @@ class Shell(object):
         else:
             self.mouth.put("Ok, will work on it as soon as possible")
         self.inbox.put(('prepare', parameters))
+
+    def do_refresh(self, parameters=None):
+        if not self.context.get('worker.busy', False):
+            self.mouth.put("Ok, working on it")
+        else:
+            self.mouth.put("Ok, will work on it as soon as possible")
+        self.inbox.put(('refresh', parameters))
 
     def do_start(self, parameters=None):
         if not self.context.get('worker.busy', False):

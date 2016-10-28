@@ -58,6 +58,8 @@ class SpeakerTests(unittest.TestCase):
         speaker.work(context)
 
         self.assertEqual(mouth.qsize(), 2)
+        self.assertEqual(mouth.get(), 'hello')
+        self.assertEqual(mouth.get(), 'world')
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)
