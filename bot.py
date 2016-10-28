@@ -290,6 +290,8 @@ def configure(name="settings.yaml"):
         logging.error("Missing webhook: configuration information")
         sys.exit(1)
 
+    print("- fittings: '{}'".format(settings['fittings']))
+
     if len(sys.argv) > 1:
         try:
             port_number = int(sys.argv[1])

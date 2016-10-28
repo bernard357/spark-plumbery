@@ -61,11 +61,12 @@ class Worker(object):
                 counter = self.context.increment('worker.counter')
                 self.context.set('worker.busy', True)
                 self.process(item, counter)
+
+                self.context.set('worker.busy', False)
+                self.inbox.task_done()
             except Empty:
                 pass
 
-            self.context.set('worker.busy', False)
-            self.inbox.task_done()
 
     def process(self, item, counter):
         """
@@ -83,7 +84,9 @@ class Worker(object):
 
         try:
 
-            fittings = self.context.get('fittings', '.')+'/fittings.yaml'
+            fittings = self.context.get('general.fittings', '.')            \
+                +'/'+self.context.get('worker.template', 'example/first')   \
+                +'/fittings.yaml'
             print('- reading {}'.format(fittings))
 
             print('- loading plumbery engine')

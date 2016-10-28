@@ -68,9 +68,8 @@ class Shell(object):
 
     def do_list(self, parameters=None):
 
-        root =  self.context.get('fittings', '.')
-        print('- listing fittings in {}'.format(root))
-        self.mouth.put("You can use any of following fittings:")
+        root =  self.context.get('general.fittings', '.')
+        print('- listing fittings at {}'.format(root))
         count = 0
         for category in os.listdir(root):
             c_path = os.path.join(root,category)
@@ -80,11 +79,15 @@ class Shell(object):
                 f_path = os.path.join(c_path,fittings)
                 try:
                     with open(os.path.join(f_path, 'fittings.yaml'), 'r') as f:
+                        if count == 0:
+                            self.mouth.put("You can use any of following templates:")
                         count += 1
                         self.mouth.put("- {}".format(category+'/'+fittings))
                 except:
                     pass
         print('- found {} fittings'.format(count))
+        if count == 0:
+            self.mouth.put("No template has been found")
 
     def do_start(self, parameters=None):
         if not self.context.get('worker.busy', False):
@@ -94,9 +97,11 @@ class Shell(object):
         self.inbox.put(('start', parameters))
 
     def do_status(self, parameters=None):
-        self.mouth.put("Using {}".format(self.context.get('general.fittings')))
+        self.mouth.put("Using {}".format(self.context.get('worker.template', 'example/first')))
         if self.context.get('worker.busy', False):
-            self.mouth.put("Plumbery is busy")
+            self.mouth.put("On-going processing")
+        else:
+            self.mouth.put("Ready to process commands")
 
     def do_stop(self, parameters=None):
         if not self.context.get('worker.busy', False):
@@ -106,5 +111,5 @@ class Shell(object):
         self.inbox.put(('stop', parameters))
 
     def do_use(self, parameters):
-        self.context.set('general.fittings', parameters)
+        self.context.set('worker.template', parameters)
         self.mouth.put("This is well-noted")
