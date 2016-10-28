@@ -81,6 +81,27 @@ class SpeakerTests(unittest.TestCase):
         self.assertEqual(mouth.qsize(), 5)
         self.assertEqual(inbox.qsize(), 0)
 
+    def test_do_prepare(self):
+
+        context = Context()
+        inbox = Queue()
+        mouth = Queue()
+        shell = Shell(context, inbox, mouth)
+
+        shell.do_prepare('123')
+        context.set('worker.busy', True)
+        shell.do_prepare('456')
+        context.set('worker.busy', False)
+        shell.do_prepare('789')
+        self.assertEqual(mouth.qsize(), 3)
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        self.assertEqual(inbox.qsize(), 3)
+        self.assertEqual(inbox.get(), ('prepare', '123'))
+        self.assertEqual(inbox.get(), ('prepare', '456'))
+        self.assertEqual(inbox.get(), ('prepare', '789'))
+
     def test_do_start(self):
 
         context = Context()
@@ -110,7 +131,7 @@ class SpeakerTests(unittest.TestCase):
         shell = Shell(context, inbox, mouth)
 
         shell.do_status()
-        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.qsize(), 2)
         self.assertEqual(inbox.qsize(), 0)
 
     def test_do_stop(self):
@@ -143,7 +164,7 @@ class SpeakerTests(unittest.TestCase):
 
         self.assertEqual(context.get('general.fittings'), None)
         shell.do_use('hello/world')
-        self.assertEqual(context.get('general.fittings'), 'hello/world')
+        self.assertEqual(context.get('worker.template'), 'hello/world')
         self.assertEqual(mouth.qsize(), 1)
         self.assertEqual(inbox.qsize(), 0)
 

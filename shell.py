@@ -25,6 +25,7 @@ Some commands that may prove useful:
 - stop servers: @plumby stop
 - start servers: @plumby start
 - destroy template: @plumby dispose
+- prepare servers: @plumby prepare
 """
 
 class Shell(object):
@@ -43,6 +44,7 @@ class Shell(object):
             'dispose',
             'help',
             'list',
+            'prepare',
             'start',
             'status',
             'stop',
@@ -88,6 +90,13 @@ class Shell(object):
         print('- found {} fittings'.format(count))
         if count == 0:
             self.mouth.put("No template has been found")
+
+    def do_prepare(self, parameters=None):
+        if not self.context.get('worker.busy', False):
+            self.mouth.put("Ok, working on it")
+        else:
+            self.mouth.put("Ok, will work on it as soon as possible")
+        self.inbox.put(('prepare', parameters))
 
     def do_start(self, parameters=None):
         if not self.context.get('worker.busy', False):
