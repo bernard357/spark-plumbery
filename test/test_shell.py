@@ -17,68 +17,40 @@ from shell import Shell
 
 class SpeakerTests(unittest.TestCase):
 
-    def test_do_deploy(self):
+    def test_worker_commands(self):
 
         context = Context()
         inbox = Queue()
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
-        shell.do_deploy('123')
-        context.set('worker.busy', True)
-        shell.do_deploy('456')
-        context.set('worker.busy', False)
-        shell.do_deploy('789')
-        self.assertEqual(mouth.qsize(), 3)
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(inbox.qsize(), 3)
-        self.assertEqual(inbox.get(), ('deploy', '123'))
-        self.assertEqual(inbox.get(), ('deploy', '456'))
-        self.assertEqual(inbox.get(), ('deploy', '789'))
+        long_commands = [
+            ('deploy', shell.do_deploy),
+            ('dispose', shell.do_dispose),
+            ('information', shell.do_information),
+            ('prepare', shell.do_prepare),
+            ('refresh', shell.do_refresh),
+            ('start', shell.do_start),
+            ('stop', shell.do_stop),
+        ]
 
-    def test_do_dispose(self):
+        for label, do in long_commands:
+            print('- {}'.format(label))
 
-        context = Context()
-        inbox = Queue()
-        mouth = Queue()
-        shell = Shell(context, inbox, mouth)
-
-        shell.do_dispose('123')
-        context.set('worker.busy', True)
-        shell.do_dispose('456')
-        context.set('worker.busy', False)
-        shell.do_dispose('789')
-        self.assertEqual(mouth.qsize(), 3)
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(inbox.qsize(), 3)
-        self.assertEqual(inbox.get(), ('dispose', '123'))
-        self.assertEqual(inbox.get(), ('dispose', '456'))
-        self.assertEqual(inbox.get(), ('dispose', '789'))
-
-    def test_do_information(self):
-
-        context = Context()
-        inbox = Queue()
-        mouth = Queue()
-        shell = Shell(context, inbox, mouth)
-
-        shell.do_information('123')
-        context.set('worker.busy', True)
-        shell.do_information('456')
-        context.set('worker.busy', False)
-        shell.do_information('789')
-        self.assertEqual(mouth.qsize(), 3)
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(inbox.qsize(), 3)
-        self.assertEqual(inbox.get(), ('information', '123'))
-        self.assertEqual(inbox.get(), ('information', '456'))
-        self.assertEqual(inbox.get(), ('information', '789'))
+            do('123')
+            context.set('worker.busy', True)
+            do('456')
+            context.set('worker.busy', False)
+            do('789')
+            if label not in ('list'):
+                self.assertEqual(mouth.qsize(), 3)
+                self.assertEqual(mouth.get(), "Ok, working on it")
+                self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
+                self.assertEqual(mouth.get(), "Ok, working on it")
+                self.assertEqual(inbox.qsize(), 3)
+                self.assertEqual(inbox.get(), (label, '123'))
+                self.assertEqual(inbox.get(), (label, '456'))
+                self.assertEqual(inbox.get(), (label, '789'))
 
     def test_do_help(self):
 
@@ -102,69 +74,6 @@ class SpeakerTests(unittest.TestCase):
         self.assertEqual(mouth.qsize(), 5)
         self.assertEqual(inbox.qsize(), 0)
 
-    def test_do_prepare(self):
-
-        context = Context()
-        inbox = Queue()
-        mouth = Queue()
-        shell = Shell(context, inbox, mouth)
-
-        shell.do_prepare('123')
-        context.set('worker.busy', True)
-        shell.do_prepare('456')
-        context.set('worker.busy', False)
-        shell.do_prepare('789')
-        self.assertEqual(mouth.qsize(), 3)
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(inbox.qsize(), 3)
-        self.assertEqual(inbox.get(), ('prepare', '123'))
-        self.assertEqual(inbox.get(), ('prepare', '456'))
-        self.assertEqual(inbox.get(), ('prepare', '789'))
-
-    def test_do_refresh(self):
-
-        context = Context()
-        inbox = Queue()
-        mouth = Queue()
-        shell = Shell(context, inbox, mouth)
-
-        shell.do_refresh('123')
-        context.set('worker.busy', True)
-        shell.do_refresh('456')
-        context.set('worker.busy', False)
-        shell.do_refresh('789')
-        self.assertEqual(mouth.qsize(), 3)
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(inbox.qsize(), 3)
-        self.assertEqual(inbox.get(), ('refresh', '123'))
-        self.assertEqual(inbox.get(), ('refresh', '456'))
-        self.assertEqual(inbox.get(), ('refresh', '789'))
-
-    def test_do_start(self):
-
-        context = Context()
-        inbox = Queue()
-        mouth = Queue()
-        shell = Shell(context, inbox, mouth)
-
-        shell.do_start('123')
-        context.set('worker.busy', True)
-        shell.do_start('456')
-        context.set('worker.busy', False)
-        shell.do_start('789')
-        self.assertEqual(mouth.qsize(), 3)
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(inbox.qsize(), 3)
-        self.assertEqual(inbox.get(), ('start', '123'))
-        self.assertEqual(inbox.get(), ('start', '456'))
-        self.assertEqual(inbox.get(), ('start', '789'))
-
     def test_do_status(self):
 
         context = Context()
@@ -175,27 +84,6 @@ class SpeakerTests(unittest.TestCase):
         shell.do_status()
         self.assertEqual(mouth.qsize(), 2)
         self.assertEqual(inbox.qsize(), 0)
-
-    def test_do_stop(self):
-
-        context = Context()
-        inbox = Queue()
-        mouth = Queue()
-        shell = Shell(context, inbox, mouth)
-
-        shell.do_stop('123')
-        context.set('worker.busy', True)
-        shell.do_stop('456')
-        context.set('worker.busy', False)
-        shell.do_stop('789')
-        self.assertEqual(mouth.qsize(), 3)
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
-        self.assertEqual(mouth.get(), "Ok, working on it")
-        self.assertEqual(inbox.qsize(), 3)
-        self.assertEqual(inbox.get(), ('stop', '123'))
-        self.assertEqual(inbox.get(), ('stop', '456'))
-        self.assertEqual(inbox.get(), ('stop', '789'))
 
     def test_do_use(self):
 
