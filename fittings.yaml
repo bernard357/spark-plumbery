@@ -1,7 +1,7 @@
 ---
 
 information:
-  - "Spark interactions with plumbery"
+  - "Plumby, the chat bot for Cisco Spark and for the Managed Cloud Platform from Dimension Data"
 
 links:
   credit: https://github.com/ciscospark/SparkBotDemo
@@ -18,21 +18,14 @@ blueprints:
         ipv4: auto
 
       ethernet:
-        name: GreenPowerNetwork
-        subnet: 10.90.45.0
+        name: PlumbyNetwork
+        subnet: 10.90.90.0
 
       nodes:
-        - spark-01:
-
-            description: "Web endpoint for spark bot"
+        - plumby-01:
 
             information:
-              - "To activate the server:"
               - "ssh ubuntu@{{ node.public }}"
-              - "cd spark-plumbery"
-              - "python bot.py"
-              - "Configure Cisco Spark on following endpoint:"
-              - "http://{{ node.public }}:8080"
 
             appliance: 'Ubuntu 14'
 
@@ -50,15 +43,49 @@ blueprints:
                 - ntp
                 - git
                 - python-pip
+                - python-dev
 
               write_files:
 
-                - path: /etc/profile.d/cisco_spark.sh
+                - path: /etc/init/plumby.conf
+                  permissions: "0755"
+                  content: |
+                      description "Plumby service"
+
+                      start on runlevel [234]
+                      stop on runlevel [0156]
+
+                      setuid ubuntu
+
+                      env CISCO_SPARK_PLUMBERY_BOT="{{ environment.CISCO_SPARK_PLUMBERY_BOT }}"
+                      export CISCO_SPARK_PLUMBERY_BOT
+
+                      env CISCO_SPARK_PLUMBERY_MAN="{{ environment.CISCO_SPARK_PLUMBERY_MAN }}"
+                      export CISCO_SPARK_PLUMBERY_MAN
+
+                      env MCP_USERNAME="{{ environment.MCP_USERNAME }}"
+                      export MCP_USERNAME
+
+                      env MCP_PASSWORD="{{ environment.MCP_PASSWORD }}"
+                      export MCP_USERNAME
+
+                      env SHARED_SECRET="{{ environment.SHARED_SECRET }}"
+                      export SHARED_SECRET
+
+                      script
+                          cd /home/ubuntu/spark-plumbery
+                          python bot.py
+                      end script
+
+                - path: /etc/profile.d/plumby.sh
                   permissions: "0755"
                   content: |
                     #!/bin/sh
                     export CISCO_SPARK_PLUMBERY_BOT="{{ environment.CISCO_SPARK_PLUMBERY_BOT }}"
                     export CISCO_SPARK_PLUMBERY_MAN="{{ environment.CISCO_SPARK_PLUMBERY_MAN }}"
+                    export MCP_USERNAME="{{ environment.MCP_USERNAME }}"
+                    export MCP_PASSWORD="{{ environment.MCP_PASSWORD }}"
+                    export SHARED_SECRET="{{ environment.SHARED_SECRET }}"
 
                 - path: /root/hosts.awk
                   content: |
@@ -77,21 +104,32 @@ blueprints:
                 - cp -n /etc/ssh/ssh_host_rsa_key /home/ubuntu/.ssh/id_rsa
                 - cp -n /etc/ssh/ssh_host_rsa_key.pub /home/ubuntu/.ssh/id_rsa.pub
                 - chown ubuntu:ubuntu /home/ubuntu/.ssh/*
+                - cp -n /etc/ssh/ssh_host_rsa_key /root/.ssh/id_rsa
+                - cp -n /etc/ssh/ssh_host_rsa_key.pub /root/.ssh/id_rsa.pub
                 - sed -i "/StrictHostKeyChecking/s/^.*$/    StrictHostKeyChecking no/" /etc/ssh/ssh_config
 
                 - echo "===== Updating /etc/hosts"
                 - cp -n /etc/hosts /etc/hosts.original
                 - awk -f /root/hosts.awk /etc/hosts >/etc/hosts.new && mv /etc/hosts.new /etc/hosts
 
-                - echo "===== Installing the code"
+                - echo "===== Installing Apache libcloud"
+                - pip install -e git+https://git-wip-us.apache.org/repos/asf/libcloud.git@trunk#egg=apache-libcloud
+
+                - echo "===== Installing plumbery"
+                - pip install -e git+https://github.com/bernard357/plumbery.git@master#egg=plumbery
+
+                - echo "===== Installing plumbery contrib"
+                - cd /home/ubuntu/
+                - git clone https://github.com/bernard357/plumbery-contrib.git
+
+                - echo "===== Installing plumby"
                 - cd /home/ubuntu/
                 - git clone https://github.com/bernard357/spark-plumbery.git
                 - cd spark-plumbery/
                 - pip install -r requirements.txt
 
-                - echo "===== Installing sample fittings"
-                - cd /home/ubuntu/
-                - git clone https://github.com/bernard357/plumbery-contrib.git
+                - echo "===== Starting plumby as a daemon service"
+                - start plumby
 
               hostname: "{{ node.name }}"
 
@@ -104,6 +142,12 @@ blueprints:
                 - default
 
                 - name: ubuntu
+                  sudo: 'ALL=(ALL) NOPASSWD:ALL'
+                  ssh-authorized-keys:
+                    - "{{ rsa_public.key }}"
+                    - "{{ rsa_public.local }}"
+
+                - name: root
                   sudo: 'ALL=(ALL) NOPASSWD:ALL'
                   ssh-authorized-keys:
                     - "{{ rsa_public.key }}"
