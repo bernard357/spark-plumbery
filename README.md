@@ -32,7 +32,11 @@ With the combination of Cisco Spark, plumby and the Managed Cloud Platform you c
 
 4. On completion, use information displayed in the chat room to check the behaviour of the cluster.
 
-5. Interact with the software developer and provide him with access to the cluster. This can be done over Cisco Spark or any other communication mean.
+5. Interact with the software developer and provide him with access to the cluster. This can be done over Cisco Spark or any other communication mean. To retrieve information on the template that has been deployed just ask plumby.
+
+    """
+    Plumby information
+    """
 
 6. The software developer would perform some tests using the cluster and other components, as automatically as possible.
 
@@ -52,7 +56,7 @@ Click in the chat box and type `@plumby` then click or tap on the Plumby label d
 
 ## What can plumby really do?
 
-Plumby has absolutely zero artificial intelligence, so do not expect too much from it. Please type commands carefully and double-check the input to avoid mistakes.
+Plumby has absolutely zero artificial intelligence, so do not expect too much from it. Please type commands carefully.
 
 Common plumby commands:
 

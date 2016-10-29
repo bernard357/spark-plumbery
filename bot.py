@@ -49,11 +49,13 @@ speaker = Speaker(outbox, mouth)
 from worker import Worker
 worker = Worker(inbox, outbox)
 
-# the listener acknowledges commands and feeds the worker via the inbox
+# the shell handles immediate commands and delegates others to the worker
 #
 from shell import Shell
 shell = Shell(context, inbox, mouth)
 
+# the listener acknowledges commands and feeds the worker via the inbox
+#
 from listener import Listener
 listener = Listener(ears, shell)
 
