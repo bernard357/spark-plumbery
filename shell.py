@@ -19,15 +19,14 @@ import os
 help_markdown = """
 Some commands that may prove useful:
 - show status: @plumby status
-- list templates: @plumby list
+- list categories: @plumby list
+- list templates: @plumby list analytics
 - use template: @plumby use analytics/hadoop-cluster
 - deploy template: @plumby deploy
+- get information: @plumby information
 - stop servers: @plumby stop
 - start servers: @plumby start
 - destroy resources: @plumby dispose
-- prepare servers: @plumby prepare
-- refresh servers: @plumby refresh
-- get information: @plumby information
 """
 
 class Shell(object):
