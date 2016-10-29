@@ -44,13 +44,13 @@ class SpeakerTests(unittest.TestCase):
             do('789')
             if label not in ('list'):
                 self.assertEqual(mouth.qsize(), 3)
-                self.assertEqual(mouth.get(), "Ok, working on it")
-                self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
-                self.assertEqual(mouth.get(), "Ok, working on it")
+                self.assertEqual(mouth.get_nowait(), "Ok, working on it")
+                self.assertEqual(mouth.get_nowait(), "Ok, will work on it as soon as possible")
+                self.assertEqual(mouth.get_nowait(), "Ok, working on it")
                 self.assertEqual(inbox.qsize(), 3)
-                self.assertEqual(inbox.get(), (label, '123'))
-                self.assertEqual(inbox.get(), (label, '456'))
-                self.assertEqual(inbox.get(), (label, '789'))
+                self.assertEqual(inbox.get_nowait(), (label, '123'))
+                self.assertEqual(inbox.get_nowait(), (label, '456'))
+                self.assertEqual(inbox.get_nowait(), (label, '789'))
 
     def test_do_help(self):
 
@@ -71,7 +71,29 @@ class SpeakerTests(unittest.TestCase):
         shell = Shell(context, inbox, mouth)
 
         shell.do_list()
-        self.assertEqual(mouth.qsize(), 5)
+        self.assertEqual(mouth.qsize(), 3)
+        self.assertEqual(mouth.get_nowait(), "You can list templates in following categories:")
+        self.assertEqual(mouth.get_nowait(), "- category1")
+        self.assertEqual(mouth.get_nowait(), "- category2")
+        self.assertEqual(inbox.qsize(), 0)
+
+        shell.do_list('*unknown*')
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get_nowait(), "There is no category '*unknown*'")
+        self.assertEqual(inbox.qsize(), 0)
+
+        shell.do_list('category1')
+        self.assertEqual(mouth.qsize(), 3)
+        self.assertEqual(mouth.get_nowait(), "You can use any of following templates:")
+        self.assertEqual(mouth.get_nowait(), "- category1/fittings1")
+        self.assertEqual(mouth.get_nowait(), "- category1/fittings2")
+        self.assertEqual(inbox.qsize(), 0)
+
+        shell.do_list('category2')
+        self.assertEqual(mouth.qsize(), 3)
+        self.assertEqual(mouth.get_nowait(), "You can use any of following templates:")
+        self.assertEqual(mouth.get_nowait(), "- category2/fittings1")
+        self.assertEqual(mouth.get_nowait(), "- category2/fittings2")
         self.assertEqual(inbox.qsize(), 0)
 
     def test_do_status(self):

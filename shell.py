@@ -68,22 +68,39 @@ class Shell(object):
 
         root =  self.context.get('general.fittings', '.')
         print('- listing fittings at {}'.format(root))
+
+        if parameters is None:
+            count = 0
+            for category in os.listdir(root):
+                c_path = os.path.join(root,category)
+                if not os.path.isdir(c_path):
+                    continue
+                if count == 0:
+                    self.mouth.put("You can list templates in following categories:")
+                count += 1
+                self.mouth.put("- {}".format(category))
+            print('- found {} categories'.format(count))
+            if count == 0:
+                self.mouth.put("No category has been found")
+            return
+
+        c_path = os.path.join(root,parameters)
+        if not os.path.isdir(c_path):
+            self.mouth.put("There is no category '{}'".format(parameters))
+            return
+
         count = 0
-        for category in os.listdir(root):
-            c_path = os.path.join(root,category)
-            if not os.path.isdir(c_path):
-                continue
-            for fittings in os.listdir(c_path):
-                f_path = os.path.join(c_path,fittings)
-                try:
-                    with open(os.path.join(f_path, 'fittings.yaml'), 'r') as f:
-                        if count == 0:
-                            self.mouth.put("You can use any of following templates:")
-                        count += 1
-                        self.mouth.put("- {}".format(category+'/'+fittings))
-                except:
-                    pass
-        print('- found {} fittings'.format(count))
+        for fittings in os.listdir(c_path):
+            f_path = os.path.join(c_path,fittings)
+            try:
+                with open(os.path.join(f_path, 'fittings.yaml'), 'r') as f:
+                    if count == 0:
+                        self.mouth.put("You can use any of following templates:")
+                    count += 1
+                    self.mouth.put("- {}".format(parameters+'/'+fittings))
+            except IOError:
+                pass
+        print('- found {} templates'.format(count))
         if count == 0:
             self.mouth.put("No template has been found")
 
