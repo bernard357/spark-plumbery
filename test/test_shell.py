@@ -98,6 +98,17 @@ class SpeakerTests(unittest.TestCase):
         self.assertEqual(mouth.qsize(), 1)
         self.assertEqual(inbox.qsize(), 0)
 
+    def test_do_version(self):
+
+        context = Context()
+        inbox = Queue()
+        mouth = Queue()
+        shell = Shell(context, inbox, mouth)
+
+        shell.do_version()
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(inbox.qsize(), 0)
+
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)
     sys.exit(unittest.main())

@@ -125,3 +125,8 @@ class Shell(object):
     def do_use(self, parameters):
         self.context.set('worker.template', parameters)
         self.mouth.put("This is well-noted")
+
+    def do_version(self, parameters=None):
+        self.mouth.put("Version {}".format(self.context.get('general.version', '*unknown*')))
+
+

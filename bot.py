@@ -16,6 +16,7 @@ from bottle import route, run, request, abort
 #
 from context import Context
 context = Context()
+context.set('general.version', '0.1 alpha')
 
 # the queue of updates to be sent to Cisco Spark, processed by a Sender
 #
@@ -25,7 +26,7 @@ mouth = Queue()
 #
 outbox = Queue()
 
-# the queue of activities for a Worker, feeded by a Listener
+# the queue of activities for a Worker, feeded by a Listener and Shell
 #
 inbox = Queue()
 
