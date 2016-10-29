@@ -17,9 +17,12 @@ Plumby is a concrete experimentation on smart Ops, and implements following inno
 Let say that you and your team need a working Hadoop cluster to support a demanding application software developer.
 With the combination of Cisco Spark, plumby and the Managed Cloud Platform you can arrange this in less than 30 minutes.
 
-1. Create a new Cisco Spark room for your project and invite the other members of the team. From there you can connect easily and share information across the full team.
+1. Clone this GitHub project to an existing or to a new server with a public IP address.
+   Edit the configuration file `settings.yaml`so that you name the target Cisco Spark room and
+   add credentials.
 
-2. Add plumby to the new room so that it can receive and process commands submitted there.
+2. Run the bot so that it connects to Cisco Spark, creates a new room and connects to it.
+   From there you can check Cisco Spark from your device and ensure you are prompted by plumby there.
 
 3. Select the `analytics/hadoop-cluster` template and ask plumby to deploy it.
 
