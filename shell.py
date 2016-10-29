@@ -64,9 +64,10 @@ class Shell(object):
         self.mouth.put({'markdown': help_markdown})
 
     def do_list(self, parameters=None):
-
         root =  self.context.get('general.fittings', '.')
-        print('- listing fittings at {}'.format(root))
+        if not os.path.isdir(root):
+            self.mouth.put("Invalid path for fittings. Check configuration")
+            return
 
         if parameters is None:
             count = 0
@@ -78,14 +79,13 @@ class Shell(object):
                     self.mouth.put("You can list templates in following categories:")
                 count += 1
                 self.mouth.put("- {}".format(category))
-            print('- found {} categories'.format(count))
             if count == 0:
-                self.mouth.put("No category has been found")
+                self.mouth.put("No category has been found. Check configuration")
             return
 
         c_path = os.path.join(root,parameters)
         if not os.path.isdir(c_path):
-            self.mouth.put("There is no category '{}'".format(parameters))
+            self.mouth.put("No category has this name. Double-check with the list command.".format(parameters))
             return
 
         count = 0
@@ -99,9 +99,9 @@ class Shell(object):
                     self.mouth.put("- {}".format(parameters+'/'+fittings))
             except IOError:
                 pass
-        print('- found {} templates'.format(count))
+
         if count == 0:
-            self.mouth.put("No template has been found")
+            self.mouth.put("No template has been found. Check configuration")
 
     def do_prepare(self, parameters=None):
         if not self.context.get('worker.busy', False):
@@ -138,11 +138,27 @@ class Shell(object):
             self.mouth.put("Ok, will work on it as soon as possible")
         self.inbox.put(('stop', parameters))
 
-    def do_use(self, parameters):
-        self.context.set('worker.template', parameters)
-        self.mouth.put("This is well-noted")
+    def do_use(self, parameters=None):
+        root =  self.context.get('general.fittings', '.')
+        if not os.path.isdir(root):
+            self.mouth.put("Invalid path for fittings. Check configuration")
+            return
+
+        if parameters is None:
+            self.mouth.put("Please indicate the category and the template that you want to use.")
+            return
+
+        if '/' not in parameters:
+            self.mouth.put("Please indicate the category and the template that you want to use.")
+            return
+
+        f_path = os.path.join(root,parameters)
+        try:
+            with open(os.path.join(f_path, 'fittings.yaml'), 'r') as f:
+                self.context.set('worker.template', parameters)
+                self.mouth.put("This is well-noted")
+        except IOError:
+            self.mouth.put("No template has this name. Double-check with the list command.")
 
     def do_version(self, parameters=None):
         self.mouth.put("Version {}".format(self.context.get('general.version', '*unknown*')))
-
-

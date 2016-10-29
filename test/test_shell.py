@@ -24,7 +24,7 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
-        long_commands = [
+        worker_commands = [
             ('deploy', shell.do_deploy),
             ('dispose', shell.do_dispose),
             ('information', shell.do_information),
@@ -34,23 +34,21 @@ class SpeakerTests(unittest.TestCase):
             ('stop', shell.do_stop),
         ]
 
-        for label, do in long_commands:
-            print('- {}'.format(label))
+        for label, do in worker_commands:
 
             do('123')
             context.set('worker.busy', True)
             do('456')
             context.set('worker.busy', False)
             do('789')
-            if label not in ('list'):
-                self.assertEqual(mouth.qsize(), 3)
-                self.assertEqual(mouth.get_nowait(), "Ok, working on it")
-                self.assertEqual(mouth.get_nowait(), "Ok, will work on it as soon as possible")
-                self.assertEqual(mouth.get_nowait(), "Ok, working on it")
-                self.assertEqual(inbox.qsize(), 3)
-                self.assertEqual(inbox.get_nowait(), (label, '123'))
-                self.assertEqual(inbox.get_nowait(), (label, '456'))
-                self.assertEqual(inbox.get_nowait(), (label, '789'))
+            self.assertEqual(mouth.qsize(), 3)
+            self.assertEqual(mouth.get_nowait(), "Ok, working on it")
+            self.assertEqual(mouth.get_nowait(), "Ok, will work on it as soon as possible")
+            self.assertEqual(mouth.get_nowait(), "Ok, working on it")
+            self.assertEqual(inbox.qsize(), 3)
+            self.assertEqual(inbox.get_nowait(), (label, '123'))
+            self.assertEqual(inbox.get_nowait(), (label, '456'))
+            self.assertEqual(inbox.get_nowait(), (label, '789'))
 
     def test_do_help(self):
 
@@ -71,15 +69,16 @@ class SpeakerTests(unittest.TestCase):
         shell = Shell(context, inbox, mouth)
 
         shell.do_list()
-        self.assertEqual(mouth.qsize(), 3)
+        self.assertEqual(mouth.qsize(), 4)
         self.assertEqual(mouth.get_nowait(), "You can list templates in following categories:")
         self.assertEqual(mouth.get_nowait(), "- category1")
         self.assertEqual(mouth.get_nowait(), "- category2")
+        self.assertEqual(mouth.get_nowait(), "- category3_is_empty")
         self.assertEqual(inbox.qsize(), 0)
 
         shell.do_list('*unknown*')
         self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "There is no category '*unknown*'")
+        self.assertEqual(mouth.get_nowait(), "No category has this name. Double-check with the list command.")
         self.assertEqual(inbox.qsize(), 0)
 
         shell.do_list('category1')
@@ -95,6 +94,18 @@ class SpeakerTests(unittest.TestCase):
         self.assertEqual(mouth.get_nowait(), "- category2/fittings1")
         self.assertEqual(mouth.get_nowait(), "- category2/fittings2")
         self.assertEqual(inbox.qsize(), 0)
+
+        shell.do_list('category3_is_empty')
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get_nowait(), "No template has been found. Check configuration")
+        self.assertEqual(inbox.qsize(), 0)
+
+        context.set('general.fittings', './perfectly_unknown_path')
+        shell.do_list()
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get_nowait(), "Invalid path for fittings. Check configuration")
+        self.assertEqual(inbox.qsize(), 0)
+
 
     def test_do_status(self):
 
@@ -115,9 +126,37 @@ class SpeakerTests(unittest.TestCase):
         shell = Shell(context, inbox, mouth)
 
         self.assertEqual(context.get('general.fittings'), None)
-        shell.do_use('hello/world')
-        self.assertEqual(context.get('worker.template'), 'hello/world')
+        self.assertEqual(context.get('worker.template'), None)
+
+        shell.do_use()
+        self.assertEqual(context.get('worker.template'), None)
         self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get_nowait(), "Please indicate the category and the template that you want to use.")
+        self.assertEqual(inbox.qsize(), 0)
+
+        shell.do_use('category1')
+        self.assertEqual(context.get('worker.template'), None)
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get_nowait(), "Please indicate the category and the template that you want to use.")
+        self.assertEqual(inbox.qsize(), 0)
+
+        shell.do_use('hello/world')
+        self.assertEqual(context.get('worker.template'), None)
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get_nowait(), "No template has this name. Double-check with the list command.")
+        self.assertEqual(inbox.qsize(), 0)
+
+        shell.do_use('category1/fittings2')
+        self.assertEqual(context.get('worker.template'), 'category1/fittings2')
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get_nowait(), "This is well-noted")
+        self.assertEqual(inbox.qsize(), 0)
+
+        context.set('general.fittings', './perfectly_unknown_path')
+        shell.do_use('category2/fittings1')
+        self.assertEqual(context.get('worker.template'), 'category1/fittings2')
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertEqual(mouth.get_nowait(), "Invalid path for fittings. Check configuration")
         self.assertEqual(inbox.qsize(), 0)
 
     def test_do_version(self):
