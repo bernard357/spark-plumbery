@@ -1,7 +1,7 @@
 # Plumby, a chat assistant for smart Ops
 
 Plumby is your chat assistant for the preparation and the delivery of amazing demonstrations related to cloud orchestration.
-For example, ask plumby to [deploy a Hadoop cluster])(https://github.com/bernard357/plumbery-contrib/tree/master/fittings/analytics/hadoop-cluster), and in response you will get web links to access the ready-to-use HDFS and YARN consoles created for you. Or pick-up any other template from [the plumbery library](https://github.com/bernard357/plumbery-contrib/tree/master/fittings),
+For example, ask plumby to [deploy a Hadoop cluster](https://github.com/bernard357/plumbery-contrib/tree/master/fittings/analytics/hadoop-cluster), and in response you will get web links to access the ready-to-use HDFS and YARN consoles created for you. Or pick-up any other template from [the plumbery library](https://github.com/bernard357/plumbery-contrib/tree/master/fittings),
 such as [the Puppet demonstration](http://github.com/bernard357/plumbery-contrib/fittings/devops/puppet).
 
 Plumby is a software robot (a bot) that relies on Cisco Spark for its main user interface. In the backgound, plumby interacts with the CloudControl API from Dimension Data to deploy, refresh and kill resources on the Managed Cloud Platform.
@@ -35,17 +35,13 @@ With the combination of Cisco Spark, plumby and the Managed Cloud Platform you c
 
 5. Interact with the software developer and provide him with access to the cluster. This can be done over Cisco Spark or any other communication mean. To retrieve information on the template that has been deployed just ask plumby.
 
-    """
-    Plumby information
-    """
+        Plumby information
 
 6. The software developer would perform some tests using the cluster and other components, as automatically as possible.
 
 7. At some point, you go back to the Cisco Spark room of this project and just kill the Hadoop cluster
 
-    """
-    Plumby dispose
-    """
+        Plumby dispose
 
 ## How do I interact with plumby?
 
