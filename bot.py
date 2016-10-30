@@ -16,7 +16,7 @@ from bottle import route, run, request, abort
 #
 from context import Context
 context = Context()
-context.set('general.version', '0.1 alpha')
+context.set('plumby.version', '0.2 alpha')
 
 # the queue of updates to be sent to Cisco Spark, processed by a Sender
 #
@@ -81,7 +81,7 @@ def from_spark():
         # step 2 -- get the message itself
         #
         url = 'https://api.ciscospark.com/v1/messages/{}'.format(message_id)
-        bearer = context.get('general.CISCO_SPARK_PLUMBERY_BOT')
+        bearer = context.get('spark.CISCO_SPARK_PLUMBERY_BOT')
         headers = {'Authorization': 'Bearer '+bearer}
         response = requests.get(url=url, headers=headers)
 
@@ -99,49 +99,6 @@ def from_spark():
         raise
 
 
-def get_room(context):
-    """
-    Looks for a suitable Cisco Spark room
-
-    :return: the id of the target room
-    :rtype: ``str``
-
-    This function creates a new room if necessary
-    """
-
-    room = context.get('general.room')
-    bearer = context.get('general.CISCO_SPARK_PLUMBERY_BOT')
-
-    print("Looking for Cisco Spark room '{}'".format(room))
-
-    url = 'https://api.ciscospark.com/v1/rooms'
-    headers = {'Authorization': 'Bearer '+bearer}
-    response = requests.get(url=url, headers=headers)
-
-    if response.status_code != 200:
-        print(response.json())
-        raise Exception("Received error code {}".format(response.status_code))
-
-    for item in response.json()['items']:
-        if room in item['title']:
-            print("- found it")
-            return item['id']
-
-    print("- not found")
-    print("Creating Cisco Spark room")
-
-    url = 'https://api.ciscospark.com/v1/rooms'
-    headers = {'Authorization': 'Bearer '+bearer}
-    payload = {'title': room }
-    response = requests.post(url=url, headers=headers, data=payload)
-
-    if response.status_code != 200:
-        print(response.json())
-        raise Exception("Received error code {}".format(response.status_code))
-
-    print("- done")
-    return response.json()['id']
-
 def delete_room(context):
     """
     Deletes the target Cisco Spark room
@@ -149,8 +106,8 @@ def delete_room(context):
     This function is useful to restart a clean demo environment
     """
 
-    room = context.get('general.room')
-    bearer = context.get('general.CISCO_SPARK_PLUMBERY_BOT')
+    room = context.get('spark.room')
+    bearer = context.get('spark.CISCO_SPARK_PLUMBERY_BOT')
 
     print("Deleting Cisco Spark room '{}'".format(room))
 
@@ -183,30 +140,42 @@ def delete_room(context):
     else:
         print("- no room with this name yet")
 
-    context.set('general.shouldAddModerator', True)
+    context.set('spark.room_id', None)
 
-def add_audience(context):
+def get_room(context):
     """
-    Gives a chance to some listeners to catch updates
+    Looks for a suitable Cisco Spark room
 
-    This function adds pre-defined listeners to a Cisco Spark room if necessary
+    :return: the id of the target room
+    :rtype: ``str``
+
+    This function creates a new room if necessary
     """
 
-    if context.get('general.shouldAddModerator', True) == False:
-        return
+    room = context.get('spark.room')
+    bearer = context.get('spark.CISCO_SPARK_PLUMBERY_BOT')
 
-    room_id = context.get('general.room_id')
-    bearer = context.get('general.CISCO_SPARK_PLUMBERY_BOT')
-    people = context.get('general.CISCO_SPARK_PLUMBERY_MAN')
+    print("Looking for Cisco Spark room '{}'".format(room))
 
-    print("Adding moderator to the Cisco Spark room")
-    print("- {}".format(people))
-
-    url = 'https://api.ciscospark.com/v1/memberships'
+    url = 'https://api.ciscospark.com/v1/rooms'
     headers = {'Authorization': 'Bearer '+bearer}
-    payload = {'roomId': room_id,
-               'personEmail': people,
-               'isModerator': 'true' }
+    response = requests.get(url=url, headers=headers)
+
+    if response.status_code != 200:
+        print(response.json())
+        raise Exception("Received error code {}".format(response.status_code))
+
+    for item in response.json()['items']:
+        if room in item['title']:
+            print("- found it")
+            return item['id']
+
+    print("- not found")
+    print("Creating Cisco Spark room")
+
+    url = 'https://api.ciscospark.com/v1/rooms'
+    headers = {'Authorization': 'Bearer '+bearer}
+    payload = {'title': room }
     response = requests.post(url=url, headers=headers, data=payload)
 
     if response.status_code != 200:
@@ -214,8 +183,22 @@ def add_audience(context):
         raise Exception("Received error code {}".format(response.status_code))
 
     print("- done")
+    room_id = response.json()['id']
+    context.set('spark.room_id', room_id)
 
-    context.set('general.shouldAddModerator', False)
+    print("Adding moderators to the Cisco Spark room")
+
+    for item in context.get('spark.moderators', ()):
+        print("- {}".format(item))
+        add_person(room_id, person=item, isModerator='true')
+
+    print("Adding participants to the Cisco Spark room")
+
+    for item in context.get('spark.participants', ()):
+        print("- {}".format(item))
+        add_person(room_id, person=item)
+
+    print("Getting bot id")
 
     url = 'https://api.ciscospark.com/v1/people/me'
     headers = {'Authorization': 'Bearer '+bearer}
@@ -225,7 +208,34 @@ def add_audience(context):
         print(response.json())
         raise Exception("Received error code {}".format(response.status_code))
 
-    context.set('general.bot_id', response.json()['id'])
+    print("- done")
+    context.set('spark.bot_id', response.json()['id'])
+
+def add_person(room_id, person=None, isModerator='false'):
+    """
+    Adds a person to a room
+
+    :param room_id: identify the target room
+    :type room_id: ``str``
+
+    :param person: e-mail address of the person to add
+    :type person: ``str``
+
+    :param isModerator: for medrators
+    :type isModerator: `true` or `false`
+
+    """
+
+    url = 'https://api.ciscospark.com/v1/memberships'
+    headers = {'Authorization': 'Bearer '+context.get('spark.CISCO_SPARK_PLUMBERY_BOT')}
+    payload = {'roomId': room_id,
+               'personEmail': person,
+               'isModerator': isModerator }
+    response = requests.post(url=url, headers=headers, data=payload)
+
+    if response.status_code != 200:
+        print(response.json())
+        raise Exception("Received error code {}".format(response.status_code))
 
 
 def register_hook(context):
@@ -234,9 +244,9 @@ def register_hook(context):
 
     """
 
-    room_id = context.get('general.room_id')
-    bearer = context.get('general.CISCO_SPARK_PLUMBERY_BOT')
-    webhook = context.get('general.webhook')
+    room_id = context.get('spark.room_id')
+    bearer = context.get('spark.CISCO_SPARK_PLUMBERY_BOT')
+    webhook = context.get('server.url')
 
     print("Registering webhook to Cisco Spark")
     print("- {}".format(webhook))
@@ -282,18 +292,43 @@ def configure(name="settings.yaml"):
             logging.error(str(feedback))
             sys.exit(1)
 
-    if "bot" not in settings:
-        settings['bot'] = 'plumby'
+    if "spark" not in settings:
+        logging.error("Missing spark: configuration information")
+        sys.exit(1)
 
-    if "room" not in settings:
+    if "room" not in settings['spark']:
         logging.error("Missing room: configuration information")
         sys.exit(1)
 
-    if "webhook" not in settings:
-        logging.error("Missing webhook: configuration information")
+    if "moderators" not in settings['spark']:
+        logging.error("Missing moderators: configuration information")
         sys.exit(1)
 
-    print("- fittings: '{}'".format(settings['fittings']))
+    if "bot" not in settings['spark']:
+        settings['spark']['bot'] = 'plumby'
+
+    if 'CISCO_SPARK_PLUMBERY_BOT' not in settings['spark']:
+        token = os.environ.get('CISCO_SPARK_PLUMBERY_BOT')
+        if token is None:
+            logging.error("Missing CISCO_SPARK_PLUMBERY_BOT in the environment")
+            sys.exit(1)
+        settings['spark']['CISCO_SPARK_PLUMBERY_BOT'] = token
+
+    if "plumbery" not in settings:
+        logging.error("Missing plumbery: configuration information")
+        sys.exit(1)
+
+    if "fittings" not in settings['plumbery']:
+        logging.error("Missing fittings: configuration information")
+        sys.exit(1)
+
+    if "server" not in settings:
+        logging.error("Missing server: configuration information")
+        sys.exit(1)
+
+    if "url" not in settings['server']:
+        logging.error("Missing url: configuration information")
+        sys.exit(1)
 
     if len(sys.argv) > 1:
         try:
@@ -301,11 +336,11 @@ def configure(name="settings.yaml"):
         except:
             logging.error("Invalid port_number specified")
             sys.exit(1)
-    elif "port" in settings:
-        port_number = int(settings["port"])
+    elif "port" in settings['server']:
+        port_number = int(settings['server']['port'])
     else:
         port_number = 80
-    settings['port'] = port_number
+    settings['server']['port'] = port_number
 
     if 'DEBUG' in settings:
         debug = settings['DEBUG']
@@ -314,22 +349,6 @@ def configure(name="settings.yaml"):
     settings['DEBUG'] = debug
     if debug:
         logging.basicConfig(level=logging.DEBUG)
-
-    if 'CISCO_SPARK_PLUMBERY_BOT' not in settings:
-        token = os.environ.get('CISCO_SPARK_PLUMBERY_BOT')
-        if token is None:
-            logging.error("Missing CISCO_SPARK_PLUMBERY_BOT in the environment")
-            sys.exit(1)
-        settings['CISCO_SPARK_PLUMBERY_BOT'] = token
-
-    if 'CISCO_SPARK_PLUMBERY_MAN' not in settings:
-        emails = os.environ.get('CISCO_SPARK_PLUMBERY_MAN')
-        if emails is None:
-            logging.error("Missing CISCO_SPARK_PLUMBERY_MAN in the environment")
-            sys.exit(1)
-        settings['CISCO_SPARK_PLUMBERY_MAN'] = emails
-
-    settings['count'] = 0
 
     return settings
 
@@ -344,11 +363,10 @@ if __name__ == "__main__":
     # create a clean environment for the demo
     #
     delete_room(context)
-    context.set('general.room_id', get_room(context))
 
-    # add human beings to this place
+    # create room if needed, and get its id
     #
-    add_audience(context)
+    get_room(context)
 
     # ask Cisco Spark to send updates
     #
@@ -374,7 +392,7 @@ if __name__ == "__main__":
 
     print("Starting web endpoint")
     run(host='0.0.0.0',
-        port=context.get('general.port'),
+        port=context.get('server.port'),
         debug=context.get('general.DEBUG'),
         server=os.environ.get('SERVER', 'gevent'))
 

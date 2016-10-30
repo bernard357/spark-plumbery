@@ -84,7 +84,7 @@ class Worker(object):
 
         try:
 
-            fittings = self.context.get('general.fittings', '.')            \
+            fittings = self.context.get('plumbery.fittings', '.')            \
                 +'/'+self.context.get('worker.template', 'example/first')   \
                 +'/fittings.yaml'
             print('- reading {}'.format(fittings))

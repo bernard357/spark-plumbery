@@ -147,12 +147,17 @@ class ListenerTests(unittest.TestCase):
 
         listener.do('use analytics/hadoop-cluster')
         self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get(), "This is well-noted")
+        self.assertEqual(mouth.get(), "No template has this name. Double-check with the list command.")
         self.assertEqual(inbox.qsize(), 0)
 
         listener.do('use unknown/template')
         self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get(), "This is well-noted")
+        self.assertEqual(mouth.get(), "No template has this name. Double-check with the list command.")
+        self.assertEqual(inbox.qsize(), 0)
+
+        listener.do('')
+        self.assertEqual(mouth.qsize(), 1)
+        self.assertTrue(isinstance(mouth.get(), dict))
         self.assertEqual(inbox.qsize(), 0)
 
 if __name__ == '__main__':

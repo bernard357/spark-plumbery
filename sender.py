@@ -130,8 +130,8 @@ class Sender(object):
 
         print("Sending update to Cisco Spark room")
 
-        bearer = self.context.get('general.CISCO_SPARK_PLUMBERY_BOT')
-        room_id = self.context.get('general.room_id')
+        bearer = self.context.get('spark.CISCO_SPARK_PLUMBERY_BOT')
+        room_id = self.context.get('spark.room_id')
 
         url = 'https://api.ciscospark.com/v1/messages'
         headers = {'Authorization': 'Bearer '+bearer}
@@ -147,6 +147,3 @@ class Sender(object):
 
         if response.status_code != 200:
             print("Sender received error code {}".format(response.status_code))
-
-
-

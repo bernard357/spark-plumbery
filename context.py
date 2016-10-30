@@ -29,13 +29,17 @@ class Context(object):
 
     def apply(self, settings={}):
         """
-        Applies a block of settings
+        Applies multiple settings at once
         """
 
         self.lock.acquire()
         try:
             for key in settings.keys():
-                self.values['general.'+key] = settings[key]
+                if isinstance(settings[key], dict):
+                    for label in settings[key].keys():
+                        self.values[key+'.'+label] = settings[key].get(label)
+                else:
+                    self.values['general.'+key] = settings[key]
         finally:
             self.lock.release()
 

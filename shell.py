@@ -64,16 +64,18 @@ class Shell(object):
         self.mouth.put({'markdown': help_markdown})
 
     def do_list(self, parameters=None):
-        root =  self.context.get('general.fittings', '.')
+        root =  self.context.get('plumbery.fittings', '.')
         if not os.path.isdir(root):
             self.mouth.put("Invalid path for fittings. Check configuration")
             return
 
-        if parameters is None:
+        if parameters is None or len(parameters) == 0:
             count = 0
             for category in os.listdir(root):
                 c_path = os.path.join(root,category)
                 if not os.path.isdir(c_path):
+                    continue
+                if category[0] == '.':
                     continue
                 if count == 0:
                     self.mouth.put("You can list templates in following categories:")
@@ -101,7 +103,7 @@ class Shell(object):
                 pass
 
         if count == 0:
-            self.mouth.put("No template has been found. Check configuration")
+            self.mouth.put("No template has been found in category '{}'".format(parameters))
 
     def do_prepare(self, parameters=None):
         if not self.context.get('worker.busy', False):
@@ -139,7 +141,7 @@ class Shell(object):
         self.inbox.put(('stop', parameters))
 
     def do_use(self, parameters=None):
-        root =  self.context.get('general.fittings', '.')
+        root =  self.context.get('plumbery.fittings', '.')
         if not os.path.isdir(root):
             self.mouth.put("Invalid path for fittings. Check configuration")
             return
@@ -161,4 +163,4 @@ class Shell(object):
             self.mouth.put("No template has this name. Double-check with the list command.")
 
     def do_version(self, parameters=None):
-        self.mouth.put("Version {}".format(self.context.get('general.version', '*unknown*')))
+        self.mouth.put("Version {}".format(self.context.get('plumby.version', '*unknown*')))

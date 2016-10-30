@@ -84,7 +84,7 @@ class Listener(object):
 
         # my own messages
         #
-        if item['personId'] == self.context.get('general.bot_id'):
+        if item['personId'] == self.context.get('spark.bot_id'):
             print("- sent by me, thrown away")
             return
 
@@ -95,7 +95,7 @@ class Listener(object):
         if input[0] in ['@', '/']:
             input = input[1:]
 
-        bot = self.context.get('general.bot', 'plumby')
+        bot = self.context.get('spark.bot', 'plumby')
         if not input.startswith(bot):
             print("- {}".format(input))
             print("- not for me, thrown away")
@@ -120,6 +120,9 @@ class Listener(object):
         """
         tokens = line.split(' ')
         verb = tokens.pop(0)
+        if len(verb) < 1:
+            verb = 'help'
+
         if len(tokens) > 0:
             parameters = ' '.join(tokens)
         else:
@@ -128,7 +131,7 @@ class Listener(object):
         try:
             method = getattr(self.shell, 'do_'+verb, None)
             if callable(method):
-                print("- processing command '{}'".format(verb))
+                print("- processing command '{}'".format(line))
                 method(parameters)
             else:
                 print("- invalid command")

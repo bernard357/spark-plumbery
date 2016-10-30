@@ -1,19 +1,50 @@
-# the port from which this bot is getting requests from the internet
+# Cisco Spark settings
 #
-port: 8080
+spark:
 
-# the name of the Cisco Spark room handled by this bot
-#
-room: "Green Forge"
+    # the name of the Cisco Spark room handled by this bot
+    #
+    room: "Plumby demonstration"
 
-# the token that has been created for this bot should normally be set in
-# the environment but you can override the configuration below
-#
-# CISCO_SPARK_PLUMBERY_BOT: "YWM2OEG4OGItNTQ5YS00MDU2LThkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtZWyY"
+    # pre-defined moderators
+    #
+    moderators:
+      - bernard.paques@dimensiondata.com
 
-# the parameters to use plumbery
+    # pre-defined participants
+    #
+#    participants:
+#      - anastasios.dados@dimensiondata.com
+#      - frederic.munster@dimensiondata.com
+
+    # bot name should match the one associated with token
+    #
+    bot: "plumby"
+
+    # the token that has been created for this bot should normally be set in
+    # the environment but you can override the configuration below
+    #
+    # CISCO_SPARK_PLUMBERY_BOT: "<token here hkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtyY>"
+
+# plumbery settings
 #
 plumbery:
 
-  fittings: /home/ubuntu/plumbery-contrib/fittings
+    # where to look for fittings plans
+    #
+    fittings: ../plumbery-contrib/fittings
+    #  fittings: /home/ubuntu/plumbery-contrib/fittings
+
+# server settings
+#
+server:
+
+    # the port from which this bot is getting requests from the internet
+    #
+    port: 8080
+
+    # the url that is used to access this server remotely, e.g. with ngrok
+    #
+    url: "http://73a1e282.ngrok.io"
+
 

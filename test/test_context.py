@@ -20,14 +20,17 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(context.get('general.port'), None)
 
         settings = {
-            'port': 80,
-            'CISCO_SPARK_BTTN_BOT': 'who_knows',
+            'spark': {'CISCO_SPARK_BTTN_BOT': 'who_knows'},
+            'DEBUG': True,
+            'server': {'port': 80, 'url': 'http://www.acme.com/'},
             }
 
         context.apply(settings)
 
-        self.assertEqual(context.get('general.port'), 80)
-        self.assertEqual(context.get('general.CISCO_SPARK_BTTN_BOT'), 'who_knows')
+        self.assertEqual(context.get('general.DEBUG'), True)
+        self.assertEqual(context.get('spark.CISCO_SPARK_BTTN_BOT'), 'who_knows')
+        self.assertEqual(context.get('server.port'), 80)
+        self.assertEqual(context.get('server.url'), 'http://www.acme.com/')
 
     def test_store(self):
 

@@ -68,7 +68,17 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
+        context.set('plumbery.fittings', os.path.dirname(os.path.realpath(__file__)))
+
         shell.do_list()
+        self.assertEqual(mouth.qsize(), 4)
+        self.assertEqual(mouth.get_nowait(), "You can list templates in following categories:")
+        self.assertEqual(mouth.get_nowait(), "- category1")
+        self.assertEqual(mouth.get_nowait(), "- category2")
+        self.assertEqual(mouth.get_nowait(), "- category3_is_empty")
+        self.assertEqual(inbox.qsize(), 0)
+
+        shell.do_list('')
         self.assertEqual(mouth.qsize(), 4)
         self.assertEqual(mouth.get_nowait(), "You can list templates in following categories:")
         self.assertEqual(mouth.get_nowait(), "- category1")
@@ -97,10 +107,10 @@ class SpeakerTests(unittest.TestCase):
 
         shell.do_list('category3_is_empty')
         self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "No template has been found. Check configuration")
+        self.assertEqual(mouth.get_nowait(), "No template has been found in category 'category3_is_empty'")
         self.assertEqual(inbox.qsize(), 0)
 
-        context.set('general.fittings', './perfectly_unknown_path')
+        context.set('plumbery.fittings', './perfectly_unknown_path')
         shell.do_list()
         self.assertEqual(mouth.qsize(), 1)
         self.assertEqual(mouth.get_nowait(), "Invalid path for fittings. Check configuration")
@@ -125,7 +135,9 @@ class SpeakerTests(unittest.TestCase):
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
 
-        self.assertEqual(context.get('general.fittings'), None)
+        self.assertEqual(context.get('plumbery.fittings'), None)
+        context.set('plumbery.fittings', os.path.dirname(os.path.realpath(__file__)))
+
         self.assertEqual(context.get('worker.template'), None)
 
         shell.do_use()
@@ -152,7 +164,7 @@ class SpeakerTests(unittest.TestCase):
         self.assertEqual(mouth.get_nowait(), "This is well-noted")
         self.assertEqual(inbox.qsize(), 0)
 
-        context.set('general.fittings', './perfectly_unknown_path')
+        context.set('plumbery.fittings', './perfectly_unknown_path')
         shell.do_use('category2/fittings1')
         self.assertEqual(context.get('worker.template'), 'category1/fittings2')
         self.assertEqual(mouth.qsize(), 1)

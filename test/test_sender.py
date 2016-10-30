@@ -51,8 +51,8 @@ class SenderTests(unittest.TestCase):
         self.assertEqual(mouth.qsize(), 3)
 
         context = Context()
-        context.set('general.CISCO_SPARK_PLUMBERY_BOT', 'garbage')
-        context.set('general.room_id', 'fake')
+        context.set('spark.CISCO_SPARK_PLUMBERY_BOT', 'garbage')
+        context.set('spark.room_id', 'fake')
 
         sender = Sender(mouth)
 #        sender.post_update = MagicMock()
