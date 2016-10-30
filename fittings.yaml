@@ -132,6 +132,7 @@ blueprints:
                 - sed -i -f /root/edit_settings.sed settings.yaml
 
                 - echo "===== Starting plumby as a daemon service"
+                - chown ubuntu:ubuntu -R /home/ubuntu
                 - start plumby
 
               hostname: "{{ node.name }}"
