@@ -1,7 +1,7 @@
 ---
 
 information:
-  - "Plumby, the chat bot for Cisco Spark and for the Managed Cloud Platform from Dimension Data"
+  - "Plumby, the chat bot for Cisco Spark and for the CloudControl API from Dimension Data"
 
 links:
   credit: https://github.com/ciscospark/SparkBotDemo
@@ -60,9 +60,6 @@ blueprints:
                       env CISCO_SPARK_PLUMBERY_BOT="{{ environment.CISCO_SPARK_PLUMBERY_BOT }}"
                       export CISCO_SPARK_PLUMBERY_BOT
 
-                      env CISCO_SPARK_PLUMBERY_MAN="{{ environment.CISCO_SPARK_PLUMBERY_MAN }}"
-                      export CISCO_SPARK_PLUMBERY_MAN
-
                       env MCP_USERNAME="{{ environment.MCP_USERNAME }}"
                       export MCP_USERNAME
 
@@ -82,7 +79,6 @@ blueprints:
                   content: |
                     #!/bin/sh
                     export CISCO_SPARK_PLUMBERY_BOT="{{ environment.CISCO_SPARK_PLUMBERY_BOT }}"
-                    export CISCO_SPARK_PLUMBERY_MAN="{{ environment.CISCO_SPARK_PLUMBERY_MAN }}"
                     export MCP_USERNAME="{{ environment.MCP_USERNAME }}"
                     export MCP_PASSWORD="{{ environment.MCP_PASSWORD }}"
                     export SHARED_SECRET="{{ environment.SHARED_SECRET }}"
@@ -127,6 +123,7 @@ blueprints:
                 - git clone https://github.com/bernard357/spark-plumbery.git
                 - cd spark-plumbery/
                 - pip install -r requirements.txt
+                - sed -i "/#url:/s/^.*$/    url: http://{{ node.public }}:8080/" settings.yaml
 
                 - echo "===== Starting plumby as a daemon service"
                 - start plumby

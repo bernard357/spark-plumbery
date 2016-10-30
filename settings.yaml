@@ -33,7 +33,6 @@ plumbery:
     # where to look for fittings plans
     #
     fittings: ../plumbery-contrib/fittings
-    #  fittings: /home/ubuntu/plumbery-contrib/fittings
 
 # server settings
 #
@@ -45,6 +44,6 @@ server:
 
     # the url that is used to access this server remotely, e.g. with ngrok
     #
-    url: "http://73a1e282.ngrok.io"
+    #url: "http://73a1e282.ngrok.io"
 
 
