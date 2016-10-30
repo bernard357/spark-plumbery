@@ -94,6 +94,11 @@ blueprints:
                      print "{{ node.private }}    {{ node.name }}"
                     }
 
+                - path: /root/edit_settings.sed
+                  content: |
+                    #!/usr/bin/sed
+                    /#url:/s|^.*$|    url: http://{{ node.public }}:8080/|
+
               runcmd:
 
                 - echo "===== Handling ubuntu identity"
@@ -112,6 +117,7 @@ blueprints:
                 - pip install -e git+https://git-wip-us.apache.org/repos/asf/libcloud.git@trunk#egg=apache-libcloud
 
                 - echo "===== Installing plumbery"
+                - pip install xmltodict
                 - pip install -e git+https://github.com/bernard357/plumbery.git@master#egg=plumbery
 
                 - echo "===== Installing plumbery contrib"
@@ -123,7 +129,7 @@ blueprints:
                 - git clone https://github.com/bernard357/spark-plumbery.git
                 - cd spark-plumbery/
                 - pip install -r requirements.txt
-                - sed -i "/#url:/s/^.*$/    url: http://{{ node.public }}:8080/" settings.yaml
+                - sed -i -f /root/edit_settings.sed settings.yaml
 
                 - echo "===== Starting plumby as a daemon service"
                 - start plumby
