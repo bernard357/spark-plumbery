@@ -4,6 +4,8 @@ Plumby is your chat assistant for the preparation and the delivery of amazing de
 For example, ask plumby to [deploy a Hadoop cluster](https://github.com/bernard357/plumbery-contrib/tree/master/fittings/analytics/hadoop-cluster), and in response you will get web links to access the ready-to-use HDFS and YARN consoles created for you. Or pick-up any other template from [the plumbery library](https://github.com/bernard357/plumbery-contrib/tree/master/fittings),
 such as [the Puppet demonstration](http://github.com/bernard357/plumbery-contrib/fittings/devops/puppet).
 
+![plumby](docs/plumby.png)
+
 Plumby is a software robot (a bot) that relies on Cisco Spark for its main user interface. In the backgound, plumby interacts with the CloudControl API from Dimension Data to deploy, refresh and kill resources on the Managed Cloud Platform.
 
 Plumby is a concrete experimentation on smart Ops, and implements following innovative features:
@@ -49,7 +51,7 @@ Plumby analyses commands sent to it, and responds accordingly. At any point in t
 
 Click in the chat box and type `@plumby` then click or tap on the Plumby label displayed above. Now Cisco Spark knows who you are talking to. Press the space bar and type the rest of the command. The bot will respond to you by appending one or several updates in the room.
 
-![chat](docs/chat.png)
+![invoke](docs/invoke.png)
 
 ## What can plumby really do?
 
