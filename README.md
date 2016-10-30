@@ -1,7 +1,7 @@
 # Plumby, a chat assistant for smart Ops
 
 Plumby is your chat assistant for the preparation and the delivery of amazing demonstrations related to cloud orchestration.
-For example, ask plumby to deploy a Hadoop cluster, and in response you will get web links to access the ready-to-use HDFS and YARN consoles created for you. Or pick-up any other template from [the plumbery library](http://github.com/bernard357/plumbery-contrib),
+For example, ask plumby to [deploy a Hadoop cluster])(https://github.com/bernard357/plumbery-contrib/tree/master/fittings/analytics/hadoop-cluster), and in response you will get web links to access the ready-to-use HDFS and YARN consoles created for you. Or pick-up any other template from [the plumbery library](https://github.com/bernard357/plumbery-contrib/tree/master/fittings),
 such as [the Puppet demonstration](http://github.com/bernard357/plumbery-contrib/fittings/devops/puppet).
 
 Plumby is a software robot (a bot) that relies on Cisco Spark for its main user interface. In the backgound, plumby interacts with the CloudControl API from Dimension Data to deploy, refresh and kill resources on the Managed Cloud Platform.
@@ -26,12 +26,10 @@ With the combination of Cisco Spark, plumby and the Managed Cloud Platform you c
 
 3. Select the `analytics/hadoop-cluster` template and ask plumby to deploy it.
 
-    """
-    Plumby list
-    Plumby list analytics
-    Plumby use analytics/hadoop-cluster
-    Plumby deploy
-    """
+        Plumby list
+        Plumby list analytics
+        Plumby use analytics/hadoop-cluster
+        Plumby deploy
 
 4. On completion, use information displayed in the chat room to check the behaviour of the cluster.
 
