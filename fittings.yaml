@@ -44,6 +44,9 @@ blueprints:
                 - git
                 - python-pip
                 - python-dev
+                - build-essential
+                - libssl-dev
+                - libffi-dev
 
               write_files:
 
