@@ -63,7 +63,7 @@ listener = Listener(ears, shell)
 # the endpoint exposed to Cisco Spark
 #
 @route("/", method=['GET', 'POST'])
-def from_spark():
+def push_from_spark():
     """
     Processes the flow of events from Cisco Spark
 
@@ -97,6 +97,52 @@ def from_spark():
     except Exception as feedback:
         print("ABORTED: fatal error has been encountered")
         raise
+
+
+def pull_from_spark():
+    """
+    Processes the flow of events from Cisco Spark
+
+    This function senses new items at regular intervals
+    """
+
+    print('Fetching data pro-actively')
+
+    bearer = context.get('spark.CISCO_SPARK_PLUMBERY_BOT')
+    room_id = context.get('spark.room_id')
+    last_id = 0
+    while self.context.get('general.switch', 'on') == 'on':
+
+        try:
+            url = 'https://api.ciscospark.com/v1/messages'
+            headers = {'Authorization': 'Bearer '+bearer}
+            payload = {'roomId': room_id, 'max': 10 }
+            response = requests.get(url=url, headers=headers, data=payload)
+
+            if response.status_code != 200:
+                raise Exception("Received error code {}".format(response.status_code))
+
+            items = response.json()['items']
+
+            index = 0
+            while index < len(items):
+                if items[index]['id'] == last_id:
+                    break
+                index += 1
+
+            if index > 0:
+                print("Fetching {} new messages".format(index))
+
+            while index > 0:
+                index -= 1
+                last_id = items[index]['id']
+                ears.put(items[index])
+
+            time.sleep(1)
+
+        except Exception as feedback:
+            print("ERROR: exception raised while fetching ùessages")
+            raise
 
 
 def delete_room(context):
