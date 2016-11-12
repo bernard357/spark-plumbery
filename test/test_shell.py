@@ -3,10 +3,9 @@
 import unittest
 import logging
 import os
-from Queue import Queue
+from multiprocessing import Process, Queue
 import random
 import sys
-from threading import Thread
 import time
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -41,14 +40,16 @@ class SpeakerTests(unittest.TestCase):
             do('456')
             context.set('worker.busy', False)
             do('789')
-            self.assertEqual(mouth.qsize(), 3)
-            self.assertEqual(mouth.get_nowait(), "Ok, working on it")
-            self.assertEqual(mouth.get_nowait(), "Ok, will work on it as soon as possible")
-            self.assertEqual(mouth.get_nowait(), "Ok, working on it")
-            self.assertEqual(inbox.qsize(), 3)
-            self.assertEqual(inbox.get_nowait(), (label, '123'))
-            self.assertEqual(inbox.get_nowait(), (label, '456'))
-            self.assertEqual(inbox.get_nowait(), (label, '789'))
+            self.assertEqual(mouth.get(), "Ok, working on it")
+            self.assertEqual(mouth.get(), "Ok, will work on it as soon as possible")
+            self.assertEqual(mouth.get(), "Ok, working on it")
+            with self.assertRaises(Exception):
+                mouth.get_nowait()
+            self.assertEqual(inbox.get(), (label, '123'))
+            self.assertEqual(inbox.get(), (label, '456'))
+            self.assertEqual(inbox.get(), (label, '789'))
+            with self.assertRaises(Exception):
+                inbox.get_nowait()
 
     def test_do_help(self):
 
@@ -58,8 +59,11 @@ class SpeakerTests(unittest.TestCase):
         shell = Shell(context, inbox, mouth)
 
         shell.do_help()
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(inbox.qsize(), 0)
+        mouth.get()
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
     def test_do_list(self):
 
@@ -71,50 +75,64 @@ class SpeakerTests(unittest.TestCase):
         context.set('plumbery.fittings', os.path.dirname(os.path.realpath(__file__)))
 
         shell.do_list()
-        self.assertEqual(mouth.qsize(), 4)
-        self.assertEqual(mouth.get_nowait(), "You can list templates in following categories:")
-        self.assertEqual(mouth.get_nowait(), "- category1")
-        self.assertEqual(mouth.get_nowait(), "- category2")
-        self.assertEqual(mouth.get_nowait(), "- category3_is_empty")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "You can list templates in following categories:")
+        self.assertEqual(mouth.get(), "- category1")
+        self.assertEqual(mouth.get(), "- category2")
+        self.assertEqual(mouth.get(), "- category3_is_empty")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         shell.do_list('')
-        self.assertEqual(mouth.qsize(), 4)
-        self.assertEqual(mouth.get_nowait(), "You can list templates in following categories:")
-        self.assertEqual(mouth.get_nowait(), "- category1")
-        self.assertEqual(mouth.get_nowait(), "- category2")
-        self.assertEqual(mouth.get_nowait(), "- category3_is_empty")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "You can list templates in following categories:")
+        self.assertEqual(mouth.get(), "- category1")
+        self.assertEqual(mouth.get(), "- category2")
+        self.assertEqual(mouth.get(), "- category3_is_empty")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         shell.do_list('*unknown*')
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "No category has this name. Double-check with the list command.")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "No category has this name. Double-check with the list command.")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         shell.do_list('category1')
-        self.assertEqual(mouth.qsize(), 3)
-        self.assertEqual(mouth.get_nowait(), "You can use any of following templates:")
-        self.assertEqual(mouth.get_nowait(), "- category1/fittings1")
-        self.assertEqual(mouth.get_nowait(), "- category1/fittings2")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "You can use any of following templates:")
+        self.assertEqual(mouth.get(), "- category1/fittings1")
+        self.assertEqual(mouth.get(), "- category1/fittings2")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         shell.do_list('category2')
-        self.assertEqual(mouth.qsize(), 3)
-        self.assertEqual(mouth.get_nowait(), "You can use any of following templates:")
-        self.assertEqual(mouth.get_nowait(), "- category2/fittings1")
-        self.assertEqual(mouth.get_nowait(), "- category2/fittings2")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "You can use any of following templates:")
+        self.assertEqual(mouth.get(), "- category2/fittings1")
+        self.assertEqual(mouth.get(), "- category2/fittings2")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         shell.do_list('category3_is_empty')
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "No template has been found in category 'category3_is_empty'")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "No template has been found in category 'category3_is_empty'")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         context.set('plumbery.fittings', './perfectly_unknown_path')
         shell.do_list()
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "Invalid path for fittings. Check configuration")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "Invalid path for fittings. Check configuration")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
 
     def test_do_status(self):
@@ -125,8 +143,12 @@ class SpeakerTests(unittest.TestCase):
         shell = Shell(context, inbox, mouth)
 
         shell.do_status()
-        self.assertEqual(mouth.qsize(), 2)
-        self.assertEqual(inbox.qsize(), 0)
+        mouth.get()
+        mouth.get()
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
     def test_do_use(self):
 
@@ -142,34 +164,44 @@ class SpeakerTests(unittest.TestCase):
 
         shell.do_use()
         self.assertEqual(context.get('worker.template'), None)
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "Please indicate the category and the template that you want to use.")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "Please indicate the category and the template that you want to use.")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         shell.do_use('category1')
         self.assertEqual(context.get('worker.template'), None)
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "Please indicate the category and the template that you want to use.")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "Please indicate the category and the template that you want to use.")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         shell.do_use('hello/world')
         self.assertEqual(context.get('worker.template'), None)
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "No template has this name. Double-check with the list command.")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "No template has this name. Double-check with the list command.")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         shell.do_use('category1/fittings2')
         self.assertEqual(context.get('worker.template'), 'category1/fittings2')
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "This is well-noted")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "This is well-noted")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
         context.set('plumbery.fittings', './perfectly_unknown_path')
         shell.do_use('category2/fittings1')
         self.assertEqual(context.get('worker.template'), 'category1/fittings2')
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(mouth.get_nowait(), "Invalid path for fittings. Check configuration")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(mouth.get(), "Invalid path for fittings. Check configuration")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
     def test_do_version(self):
 
@@ -179,8 +211,11 @@ class SpeakerTests(unittest.TestCase):
         shell = Shell(context, inbox, mouth)
 
         shell.do_version()
-        self.assertEqual(mouth.qsize(), 1)
-        self.assertEqual(inbox.qsize(), 0)
+        mouth.get()
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)

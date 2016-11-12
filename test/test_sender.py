@@ -3,11 +3,10 @@
 import unittest
 import logging
 from mock import MagicMock
+from multiprocessing import Process, Queue
 import os
-from Queue import Queue
 import random
 import sys
-from threading import Thread
 import time
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -27,17 +26,17 @@ class SenderTests(unittest.TestCase):
         context = Context()
         sender = Sender(mouth)
 
-        sender_thread = Thread(target=sender.work, args=(context,))
-        sender_thread.setDaemon(True)
-        sender_thread.start()
+        sender_process = Process(target=sender.work, args=(context,))
+        sender_process.daemon = True
+        sender_process.start()
 
-        sender_thread.join(1.0)
-        if sender_thread.isAlive():
+        sender_process.join(1.0)
+        if sender_process.is_alive():
             logging.debug('Stopping sender')
             context.set('general.switch', 'off')
-            sender_thread.join()
+            sender_process.join()
 
-        self.assertFalse(sender_thread.isAlive())
+        self.assertFalse(sender_process.is_alive())
         self.assertEqual(context.get('sender.counter', 0), 0)
 
     def test_processing(self):
@@ -48,7 +47,6 @@ class SenderTests(unittest.TestCase):
         mouth.put('hello')
         mouth.put('world')
         mouth.put(Exception('EOQ'))
-        self.assertEqual(mouth.qsize(), 3)
 
         context = Context()
         context.set('spark.CISCO_SPARK_PLUMBERY_BOT', 'garbage')
@@ -58,7 +56,8 @@ class SenderTests(unittest.TestCase):
 #        sender.post_update = MagicMock()
         sender.work(context)
 
-        self.assertEqual(mouth.qsize(), 0)
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)

@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-from gevent import monkey; monkey.patch_all()
 import json
 import logging
 import os
-from Queue import Queue
+from multiprocessing import Process, Queue
 import requests
 from requests_toolbelt import MultipartEncoder
 import sys
-from threading import Thread
 import time
 import yaml
 from bottle import route, run, request, abort
@@ -141,7 +139,7 @@ def pull_from_spark():
             time.sleep(1)
 
         except Exception as feedback:
-            print("ERROR: exception raised while fetching ùessages")
+            print("ERROR: exception raised while fetching messages")
             raise
 
 
@@ -420,25 +418,23 @@ if __name__ == "__main__":
 
     # start processing threads in the background
     #
-    w = Thread(target=sender.work, args=(context,))
-    w.setDaemon(True)
+    w = Process(target=sender.work, args=(context,))
+    w.daemon = True
     w.start()
 
-    w = Thread(target=speaker.work, args=(context,))
-    w.setDaemon(True)
+    w = Process(target=speaker.work, args=(context,))
+    w.daemon = True
     w.start()
 
-    w = Thread(target=worker.work, args=(context,))
-    w.setDaemon(True)
+    w = Process(target=worker.work, args=(context,))
+    w.daemon = True
     w.start()
 
-    w = Thread(target=listener.work, args=(context,))
-    w.setDaemon(True)
+    w = Process(target=listener.work, args=(context,))
+    w.daemon = True
     w.start()
 
     print("Starting web endpoint")
     run(host='0.0.0.0',
         port=context.get('server.port'),
-        debug=context.get('general.DEBUG'),
-        server=os.environ.get('SERVER', 'gevent'))
-
+        debug=context.get('general.DEBUG'))

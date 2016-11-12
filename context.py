@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import logging
-from threading import Lock
+from multiprocessing import Lock, Manager
 
 class Context(object):
     """
@@ -25,7 +25,7 @@ class Context(object):
 
     def __init__(self):
         self.lock = Lock()
-        self.values = {}
+        self.values = Manager().dict()
 
     def apply(self, settings={}):
         """
@@ -49,6 +49,7 @@ class Context(object):
         """
 
         self.lock.acquire()
+        value = None
         try:
             value = self.values.get(key, default)
         finally:

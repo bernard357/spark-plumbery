@@ -4,10 +4,9 @@ import unittest
 import json
 import logging
 import os
-from Queue import Queue
 import random
 import sys
-from threading import Thread
+from multiprocessing import Process, Queue
 import time
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -16,6 +15,14 @@ from context import Context
 from listener import Listener
 from shell import Shell
 
+def qsize(queue):
+    count = 0
+    while True:
+        try:
+            item = queue.get_nowait()
+            count += 1
+        except:
+            return count
 
 class ListenerTests(unittest.TestCase):
 
@@ -31,17 +38,17 @@ class ListenerTests(unittest.TestCase):
         shell = Shell(context, inbox, mouth)
         listener = Listener(ears, shell)
 
-        listener_thread = Thread(target=listener.work, args=(context,))
-        listener_thread.setDaemon(True)
-        listener_thread.start()
+        listener_process = Process(target=listener.work, args=(context,))
+        listener_process.daemon = True
+        listener_process.start()
 
-        listener_thread.join(1.0)
-        if listener_thread.isAlive():
+        listener_process.join(1.0)
+        if listener_process.is_alive():
             logging.debug('Stopping listener')
             context.set('general.switch', 'off')
-            listener_thread.join()
+            listener_process.join()
 
-        self.assertFalse(listener_thread.isAlive())
+        self.assertFalse(listener_process.is_alive())
         self.assertEqual(context.get('listener.counter', 0), 0)
 
     def test_dynamic(self):
@@ -108,7 +115,6 @@ class ListenerTests(unittest.TestCase):
 
         ears.put(Exception('EOQ'))
 
-        self.assertEqual(ears.qsize(), 5)
         inbox = Queue()
         mouth = Queue()
 
@@ -119,9 +125,9 @@ class ListenerTests(unittest.TestCase):
         listener.work(context)
 
         self.assertEqual(context.get('listener.counter'), 4)
-        self.assertEqual(ears.qsize(), 0)
-        self.assertEqual(inbox.qsize(), 1)
-        self.assertEqual(mouth.qsize(), 2)
+        self.assertEqual(qsize(ears), 0)
+        self.assertEqual(qsize(inbox), 1)
+        self.assertEqual(qsize(mouth), 2)
 
     def test_vocabulary(self):
 
@@ -136,29 +142,29 @@ class ListenerTests(unittest.TestCase):
         listener = Listener(ears, shell)
 
         listener.do('*unknown*')
-        self.assertEqual(mouth.qsize(), 1)
         self.assertEqual(mouth.get(), "Sorry, I do not know how to handle '*unknown*'")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(qsize(mouth), 0)
+        self.assertEqual(qsize(inbox), 0)
 
         listener.do('help')
-        self.assertEqual(mouth.qsize(), 1)
         self.assertTrue(isinstance(mouth.get(), dict))
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(qsize(mouth), 0)
+        self.assertEqual(qsize(inbox), 0)
 
         listener.do('use analytics/hadoop-cluster')
-        self.assertEqual(mouth.qsize(), 1)
         self.assertEqual(mouth.get(), "No template has this name. Double-check with the list command.")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(qsize(mouth), 0)
+        self.assertEqual(qsize(inbox), 0)
 
         listener.do('use unknown/template')
-        self.assertEqual(mouth.qsize(), 1)
         self.assertEqual(mouth.get(), "No template has this name. Double-check with the list command.")
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(qsize(mouth), 0)
+        self.assertEqual(qsize(inbox), 0)
 
         listener.do('')
-        self.assertEqual(mouth.qsize(), 1)
         self.assertTrue(isinstance(mouth.get(), dict))
-        self.assertEqual(inbox.qsize(), 0)
+        self.assertEqual(qsize(mouth), 0)
+        self.assertEqual(qsize(inbox), 0)
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)

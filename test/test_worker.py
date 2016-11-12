@@ -3,10 +3,9 @@
 import unittest
 import logging
 import os
-from Queue import Queue
+from multiprocessing import Process, Queue
 import random
 import sys
-from threading import Thread
 import time
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -27,17 +26,17 @@ class WorkerTests(unittest.TestCase):
         context = Context()
         worker = Worker(inbox, outbox)
 
-        worker_thread = Thread(target=worker.work, args=(context,))
-        worker_thread.setDaemon(True)
-        worker_thread.start()
+        worker_process = Process(target=worker.work, args=(context,))
+        worker_process.daemon = True
+        worker_process.start()
 
-        worker_thread.join(1.0)
-        if worker_thread.isAlive():
+        worker_process.join(1.0)
+        if worker_process.is_alive():
             logging.debug('Stopping worker')
             context.set('general.switch', 'off')
-            worker_thread.join()
+            worker_process.join()
 
-        self.assertFalse(worker_thread.isAlive())
+        self.assertFalse(worker_process.is_alive())
         self.assertEqual(context.get('worker.counter', 0), 0)
 
     def test_processing(self):
@@ -49,10 +48,8 @@ class WorkerTests(unittest.TestCase):
         inbox.put(('dispose', ''))
         inbox.put(('unknownCommand', ''))
         inbox.put(Exception('EOQ'))
-        self.assertEqual(inbox.qsize(), 4)
 
         outbox = Queue()
-        self.assertEqual(outbox.qsize(), 0)
 
         context = Context()
         context.set('general.fittings',
@@ -63,10 +60,8 @@ class WorkerTests(unittest.TestCase):
         worker.work(context)
 
         self.assertEqual(context.get('worker.counter'), 3)
-        self.assertEqual(inbox.qsize(), 0)
-        self.assertTrue(outbox.qsize() > 2)
-
-        logging.debug('{} items in outbox'.format(outbox.qsize()))
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)

@@ -3,10 +3,9 @@
 import unittest
 import logging
 import os
-from Queue import Queue
+from multiprocessing import Process, Queue
 import random
 import sys
-from threading import Thread
 import time
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -27,17 +26,17 @@ class SpeakerTests(unittest.TestCase):
         context = Context()
         speaker = Speaker(outbox, mouth)
 
-        speaker_thread = Thread(target=speaker.work, args=(context,))
-        speaker_thread.setDaemon(True)
-        speaker_thread.start()
+        speaker_process = Process(target=speaker.work, args=(context,))
+        speaker_process.daemon = True
+        speaker_process.start()
 
-        speaker_thread.join(1.0)
-        if speaker_thread.isAlive():
+        speaker_process.join(1.0)
+        if speaker_process.is_alive():
             logging.debug('Stopping speaker')
             context.set('general.switch', 'off')
-            speaker_thread.join()
+            speaker_process.join()
 
-        self.assertFalse(speaker_thread.isAlive())
+        self.assertFalse(speaker_process.is_alive())
         self.assertEqual(context.get('speaker.counter', 0), 0)
 
     def test_processing(self):
@@ -48,18 +47,19 @@ class SpeakerTests(unittest.TestCase):
         outbox.put('hello')
         outbox.put('world')
         outbox.put(Exception('EOQ'))
-        self.assertEqual(outbox.qsize(), 3)
 
         mouth = Queue()
-        self.assertEqual(mouth.qsize(), 0)
 
         context = Context()
         speaker = Speaker(outbox, mouth)
         speaker.work(context)
 
-        self.assertEqual(mouth.qsize(), 2)
         self.assertEqual(mouth.get(), 'hello')
         self.assertEqual(mouth.get(), 'world')
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            outbox.get_nowait()
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)

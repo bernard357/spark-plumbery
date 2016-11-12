@@ -63,7 +63,6 @@ class Worker(object):
                 self.process(item, counter)
 
                 self.context.set('worker.busy', False)
-                self.inbox.task_done()
             except Empty:
                 pass
 

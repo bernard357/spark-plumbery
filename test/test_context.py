@@ -88,7 +88,7 @@ class ContextTests(unittest.TestCase):
 
         logging.debug('*** Concurrency test ***')
 
-        from threading import Thread
+        from multiprocessing import Process
         import random
         import time
 
@@ -106,13 +106,13 @@ class ContextTests(unittest.TestCase):
         logging.debug('Launching incrementing workers')
         workers = []
         for i in range(4):
-            t = Thread(target=worker, args=(i, self.counter,))
-            t.start()
-            workers.append(t)
+            p = Process(target=worker, args=(i, self.counter,))
+            p.start()
+            workers.append(p)
 
         logging.debug('Waiting for worker threads')
-        for t in workers:
-            t.join()
+        for p in workers:
+            p.join()
 
         logging.debug('Counter: %d', self.counter.get('gauge'))
         self.assertEqual(self.counter.get('gauge'), 16)

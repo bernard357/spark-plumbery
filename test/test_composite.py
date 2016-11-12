@@ -4,10 +4,9 @@ import unittest
 import logging
 from mock import MagicMock
 import os
-from Queue import Queue
+from multiprocessing import Process, Queue
 import random
 import sys
-from threading import Thread
 import time
 
 sys.path.insert(0, os.path.abspath('..'))
@@ -39,26 +38,26 @@ class CompositeTests(unittest.TestCase):
         speaker = Speaker(outbox, mouth)
         sender = Sender(mouth)
 
-        sender_thread = Thread(target=sender.work, args=(context,))
-        sender_thread.start()
+        sender_process = Process(target=sender.work, args=(context,))
+        sender_process.start()
 
-        speaker_thread = Thread(target=speaker.work, args=(context,))
-        speaker_thread.start()
+        speaker_process = Process(target=speaker.work, args=(context,))
+        speaker_process.start()
 
-        worker_thread = Thread(target=worker.work, args=(context,))
-        worker_thread.start()
+        worker_process = Process(target=worker.work, args=(context,))
+        worker_process.start()
 
-        listener_thread = Thread(target=listener.work, args=(context,))
-        listener_thread.start()
+        listener_process = Process(target=listener.work, args=(context,))
+        listener_process.start()
 
-        listener_thread.join(1.0)
-        if listener_thread.isAlive():
+        listener_process.join(1.0)
+        if listener_process.is_alive():
             logging.debug('Stopping all threads')
             context.set('general.switch', 'off')
-            listener_thread.join()
-            worker_thread.join()
-            speaker_thread.join()
-            sender_thread.join()
+            listener_process.join()
+            worker_process.join()
+            speaker_process.join()
+            sender_process.join()
 
         self.assertEqual(context.get('listener.counter', 0), 0)
         self.assertEqual(context.get('worker.counter', 0), 0)
@@ -85,21 +84,21 @@ class CompositeTests(unittest.TestCase):
         sender = Sender(mouth)
         sender.post_update = MagicMock()
 
-        sender_thread = Thread(target=sender.work, args=(context,))
-        sender_thread.setDaemon(True)
-        sender_thread.start()
+        sender_process = Process(target=sender.work, args=(context,))
+        sender_process.daemon = True
+        sender_process.start()
 
-        speaker_thread = Thread(target=speaker.work, args=(context,))
-        speaker_thread.setDaemon(True)
-        speaker_thread.start()
+        speaker_process = Process(target=speaker.work, args=(context,))
+        speaker_process.daemon = True
+        speaker_process.start()
 
-        worker_thread = Thread(target=worker.work, args=(context,))
-        worker_thread.setDaemon(True)
-        worker_thread.start()
+        worker_process = Process(target=worker.work, args=(context,))
+        worker_process.daemon = True
+        worker_process.start()
 
-        listener_thread = Thread(target=listener.work, args=(context,))
-        listener_thread.setDaemon(True)
-        listener_thread.start()
+        listener_process = Process(target=listener.work, args=(context,))
+        listener_process.daemon = True
+        listener_process.start()
 
         ears.put('hello world')
 
@@ -160,14 +159,14 @@ class CompositeTests(unittest.TestCase):
             })
 
 
-        listener_thread.join(7.0)
-        if listener_thread.isAlive():
+        listener_process.join(7.0)
+        if listener_process.is_alive():
             logging.debug('Stopping all threads')
             context.set('general.switch', 'off')
-            listener_thread.join()
-            worker_thread.join()
-            speaker_thread.join()
-            sender_thread.join()
+            listener_process.join()
+            worker_process.join()
+            speaker_process.join()
+            sender_process.join()
 
         self.assertEqual(context.get('listener.counter', 0), 5)
         self.assertEqual(context.get('worker.counter', 0), 1)
