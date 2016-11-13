@@ -63,6 +63,9 @@ blueprints:
                       env CISCO_SPARK_PLUMBERY_BOT="{{ environment.CISCO_SPARK_PLUMBERY_BOT }}"
                       export CISCO_SPARK_PLUMBERY_BOT
 
+                      env CISCO_SPARK_TOKEN="{{ environment.CISCO_SPARK_TOKEN }}"
+                      export CISCO_SPARK_TOKEN
+
                       env MCP_USERNAME="{{ environment.MCP_USERNAME }}"
                       export MCP_USERNAME
 
