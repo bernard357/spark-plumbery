@@ -18,9 +18,7 @@ from multiprocessing import Lock, Manager
 
 class Context(object):
     """
-    Stores data across multiple threads
-
-    Credit: http://www.bogotobogo.com/python/Multithread/python_multithreading_Synchronization_Lock_Objects_Acquire_Release.php
+    Stores data across multiple independent processing units
     """
 
     def __init__(self):
