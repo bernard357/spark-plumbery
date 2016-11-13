@@ -79,12 +79,14 @@ def push_from_spark():
         # step 2 -- get the message itself
         #
         url = 'https://api.ciscospark.com/v1/messages/{}'.format(message_id)
-        bearer = context.get('spark.CISCO_SPARK_PLUMBERY_BOT')
+        bearer = context.get('spark.CISCO_SPARK_TOKEN')
         headers = {'Authorization': 'Bearer '+bearer}
         response = requests.get(url=url, headers=headers)
 
         if response.status_code != 200:
-            raise Exception("Received error code {}".format(response.status_code))
+            print("Received error code {}".format(response.status_code))
+            print(response.json())
+            raise Exception
 
         # step 3 -- push it in the handling queue
         #
@@ -104,21 +106,30 @@ def pull_from_spark():
     This function senses new items at regular intervals
     """
 
-    print('Fetching data pro-actively')
+    print('Pulling messages pro-actively')
 
-    bearer = context.get('spark.CISCO_SPARK_PLUMBERY_BOT')
+    bearer = context.get('spark.CISCO_SPARK_TOKEN')
     room_id = context.get('spark.room_id')
     last_id = 0
-    while self.context.get('general.switch', 'on') == 'on':
+    while context.get('general.switch', 'on') == 'on':
+
+        time.sleep(1)
 
         try:
             url = 'https://api.ciscospark.com/v1/messages'
             headers = {'Authorization': 'Bearer '+bearer}
             payload = {'roomId': room_id, 'max': 10 }
-            response = requests.get(url=url, headers=headers, data=payload)
+            response = requests.get(url=url, headers=headers, params=payload)
+
+            if response.status_code == 403:
+                print("Received error code {}".format(response.status_code))
+                print(response.json())
+                continue
 
             if response.status_code != 200:
-                raise Exception("Received error code {}".format(response.status_code))
+                print("Received error code {}".format(response.status_code))
+                print(response.json())
+                raise Exception
 
             items = response.json()['items']
 
@@ -136,12 +147,9 @@ def pull_from_spark():
                 last_id = items[index]['id']
                 ears.put(items[index])
 
-            time.sleep(1)
-
         except Exception as feedback:
             print("ERROR: exception raised while fetching messages")
             raise
-
 
 def delete_room(context):
     """
@@ -255,6 +263,9 @@ def get_room(context):
     print("- done")
     context.set('spark.bot_id', response.json()['id'])
 
+    mouth.put("Ready to take your commands starting with @plumby")
+    mouth.put("For example, start with: @plumby help")
+
 def add_person(room_id, person=None, isModerator='false'):
     """
     Adds a person to a room
@@ -289,7 +300,7 @@ def register_hook(context):
     """
 
     room_id = context.get('spark.room_id')
-    bearer = context.get('spark.CISCO_SPARK_PLUMBERY_BOT')
+    bearer = context.get('spark.CISCO_SPARK_TOKEN')
     webhook = context.get('server.url')
 
     print("Registering webhook to Cisco Spark")
@@ -309,9 +320,6 @@ def register_hook(context):
         raise Exception("Received error code {}".format(response.status_code))
 
     print("- done")
-
-    mouth.put("Ready to take your commands starting with @plumby")
-    mouth.put("For example, start with: @plumby help")
 
 def configure(name="settings.yaml"):
     """
@@ -351,12 +359,22 @@ def configure(name="settings.yaml"):
     if "bot" not in settings['spark']:
         settings['spark']['bot'] = 'plumby'
 
+    if "mode" not in settings['spark']:
+        settings['spark']['mode'] = 'webhook'
+
     if 'CISCO_SPARK_PLUMBERY_BOT' not in settings['spark']:
         token = os.environ.get('CISCO_SPARK_PLUMBERY_BOT')
         if token is None:
             logging.error("Missing CISCO_SPARK_PLUMBERY_BOT in the environment")
             sys.exit(1)
         settings['spark']['CISCO_SPARK_PLUMBERY_BOT'] = token
+
+    if 'CISCO_SPARK_TOKEN' not in settings['spark']:
+        token = os.environ.get('CISCO_SPARK_TOKEN')
+        if token is None:
+            logging.warning("Missing CISCO_SPARK_TOKEN, reduced functionality")
+            token = settings['spark']['CISCO_SPARK_PLUMBERY_BOT']
+        settings['spark']['CISCO_SPARK_TOKEN'] = token
 
     if "plumbery" not in settings:
         logging.error("Missing plumbery: configuration information")
@@ -412,10 +430,6 @@ if __name__ == "__main__":
     #
     get_room(context)
 
-    # ask Cisco Spark to send updates
-    #
-    register_hook(context)
-
     # start processing threads in the background
     #
     w = Process(target=sender.work, args=(context,))
@@ -434,6 +448,18 @@ if __name__ == "__main__":
     w.daemon = True
     w.start()
 
+    # connect to Cisco Spark
+    #
+    if context.get('spark.mode') == 'pull':
+        w = Process(target=pull_from_spark)
+        w.daemon = True
+        w.start()
+
+    else:
+        register_hook(context)
+
+    # ready to receive updates
+    #
     print("Starting web endpoint")
     run(host='0.0.0.0',
         port=context.get('server.port'),

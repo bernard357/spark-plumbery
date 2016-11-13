@@ -21,10 +21,22 @@ spark:
     #
     bot: "plumby"
 
+    # 'webhook' - let Cisco Spark transmit new messages
+    # 'pull' - check new messages by ourself
+    #
+    mode: 'webhook'
+
     # the token that has been created for this bot should normally be set in
     # the environment but you can override the configuration below
     #
     # CISCO_SPARK_PLUMBERY_BOT: "<token here hkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtyY>"
+
+    # the token of a human being, that allow the bot to get all messages
+    # and not only those mentioning the bot itself
+    # this should normally be set in the environment
+    # but you can override the configuration below
+    #
+    # CISCO_SPARK_TOKEN: "<token here hkNWEtMJNkODk3ZDZLOGQ0OVGlZWU1NmYtyY>"
 
 # plumbery settings
 #
@@ -45,5 +57,4 @@ server:
     # the url that is used to access this server remotely, e.g. with ngrok
     #
     #url: "http://73a1e282.ngrok.io"
-
 
