@@ -182,10 +182,12 @@ class SpeakerTests(unittest.TestCase):
     def test_do_parameters(self):
 
         context = Context()
-        context.set('worker.template', 'category1/fittings1')
         inbox = Queue()
         mouth = Queue()
         shell = Shell(context, inbox, mouth)
+
+        context.set('plumbery.fittings', os.path.dirname(os.path.realpath(__file__)))
+        context.set('worker.template', 'category1/fittings1')
 
         shell.do_parameters()
         self.assertEqual(mouth.get(), "Available parameters:")
