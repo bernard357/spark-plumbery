@@ -39,6 +39,42 @@ class Shell(object):
         self.inbox = inbox
         self.mouth = mouth
 
+    def do(self, line):
+        """
+        Handles one line of text
+
+        This function uses the first token as a verb, and looks for a method
+        of the same name in the shell.
+
+        For example, for the command `use analytics/hadoop-cluster`, the function
+        will invoke `shell.do_use('analytics/hadoop-cluster')`.
+
+        If the command does not exist, an error message will be given back to
+        the end user.
+        """
+        tokens = line.split(' ')
+        verb = tokens.pop(0)
+        if len(verb) < 1:
+            verb = 'help'
+
+        if len(tokens) > 0:
+            parameters = ' '.join(tokens)
+        else:
+            parameters = ''
+
+        try:
+            method = getattr(self, 'do_'+verb, None)
+            if callable(method):
+                print("- processing command '{}'".format(line))
+                method(parameters)
+            else:
+                print("- invalid command")
+                self.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
+
+        except:
+            print("- unknown command")
+            self.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
+
     def do_deploy(self, parameters=None):
         if not self.context.get('worker.busy', False):
             self.mouth.put("Ok, working on it")

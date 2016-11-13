@@ -15,15 +15,6 @@ from context import Context
 from listener import Listener
 from shell import Shell
 
-def qsize(queue):
-    count = 0
-    while True:
-        try:
-            item = queue.get_nowait()
-            count += 1
-        except:
-            return count
-
 class ListenerTests(unittest.TestCase):
 
     def test_static(self):
@@ -125,46 +116,15 @@ class ListenerTests(unittest.TestCase):
         listener.work(context)
 
         self.assertEqual(context.get('listener.counter'), 4)
-        self.assertEqual(qsize(ears), 0)
-        self.assertEqual(qsize(inbox), 1)
-        self.assertEqual(qsize(mouth), 2)
-
-    def test_vocabulary(self):
-
-        logging.debug('*** Vocabulary test ***')
-
-        ears = Queue()
-        inbox = Queue()
-        mouth = Queue()
-
-        context = Context()
-        shell = Shell(context, inbox, mouth)
-        listener = Listener(ears, shell)
-
-        listener.do('*unknown*')
-        self.assertEqual(mouth.get(), "Sorry, I do not know how to handle '*unknown*'")
-        self.assertEqual(qsize(mouth), 0)
-        self.assertEqual(qsize(inbox), 0)
-
-        listener.do('help')
-        self.assertTrue(isinstance(mouth.get(), dict))
-        self.assertEqual(qsize(mouth), 0)
-        self.assertEqual(qsize(inbox), 0)
-
-        listener.do('use analytics/hadoop-cluster')
+        with self.assertRaises(Exception):
+            ears.get_nowait()
+        self.assertEqual(inbox.get(), ('deploy', ''))
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
         self.assertEqual(mouth.get(), "No template has this name. Double-check with the list command.")
-        self.assertEqual(qsize(mouth), 0)
-        self.assertEqual(qsize(inbox), 0)
-
-        listener.do('use unknown/template')
-        self.assertEqual(mouth.get(), "No template has this name. Double-check with the list command.")
-        self.assertEqual(qsize(mouth), 0)
-        self.assertEqual(qsize(inbox), 0)
-
-        listener.do('')
-        self.assertTrue(isinstance(mouth.get(), dict))
-        self.assertEqual(qsize(mouth), 0)
-        self.assertEqual(qsize(inbox), 0)
+        self.assertEqual(mouth.get(), "Ok, working on it")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
 
 if __name__ == '__main__':
     logging.getLogger('').setLevel(logging.DEBUG)

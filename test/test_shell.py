@@ -16,6 +16,51 @@ from shell import Shell
 
 class SpeakerTests(unittest.TestCase):
 
+    def test_vocabulary(self):
+
+        logging.debug('*** Vocabulary test ***')
+
+        inbox = Queue()
+        mouth = Queue()
+
+        context = Context()
+        shell = Shell(context, inbox, mouth)
+
+        shell.do('*unknown*')
+        self.assertEqual(mouth.get(), "Sorry, I do not know how to handle '*unknown*'")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
+
+        shell.do('help')
+        self.assertTrue(isinstance(mouth.get(), dict))
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
+
+        shell.do('use analytics/hadoop-cluster')
+        self.assertEqual(mouth.get(), "No template has this name. Double-check with the list command.")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
+
+        shell.do('use unknown/template')
+        self.assertEqual(mouth.get(), "No template has this name. Double-check with the list command.")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
+
+        shell.do('')
+        self.assertTrue(isinstance(mouth.get(), dict))
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
+
     def test_worker_commands(self):
 
         context = Context()
