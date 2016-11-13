@@ -148,7 +148,7 @@ class Shell(object):
             self.mouth.put("Invalid path for fittings. Check configuration")
             return
 
-        if parameters is None:
+        if parameters is None or len(parameters) < 1:
             parameters = self.context.get('worker.template', 'example/first')
 
         if '/' not in parameters:
@@ -174,7 +174,11 @@ class Shell(object):
                                                      .format(key))
 #                                parameters['parameter.'+key] = settings['parameters'][key]['default']
                                 self.mouth.put('- {}: {}'.format(key, settings['parameters'][key]['default']))
-#                        break
+                        else:
+                            self.mouth.put('No parameter for {}'.format(parameters))
+                        break
+                    else:
+                        self.mouth.put('No parameter for {}'.format(parameters))
         except IOError:
             self.mouth.put("No template has this name. Double-check with the list command.")
 

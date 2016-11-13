@@ -203,6 +203,7 @@ class SpeakerTests(unittest.TestCase):
             inbox.get_nowait()
 
         shell.do_parameters('category1/fittings2')
+        self.assertEqual(mouth.get(), "No parameter for category1/fittings2")
         with self.assertRaises(Exception):
             mouth.get_nowait()
         with self.assertRaises(Exception):
