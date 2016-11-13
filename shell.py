@@ -15,6 +15,7 @@
 
 import logging
 import os
+import yaml
 
 help_markdown = """
 Some commands that may prove useful:
@@ -140,6 +141,42 @@ class Shell(object):
 
         if count == 0:
             self.mouth.put("No template has been found in category '{}'".format(parameters))
+
+    def do_parameters(self, parameters=None):
+        root =  self.context.get('plumbery.fittings', '.')
+        if not os.path.isdir(root):
+            self.mouth.put("Invalid path for fittings. Check configuration")
+            return
+
+        if parameters is None:
+            parameters = self.context.get('worker.template', 'example/first')
+
+        if '/' not in parameters:
+            self.mouth.put("Please indicate the category and the template that you want to use.")
+            return
+
+        f_path = os.path.join(root,parameters)
+        try:
+            with open(os.path.join(f_path, 'fittings.yaml'), 'r') as handle:
+                plan = handle.read()
+                documents = plan.split('\n---')
+                for document in documents:
+                    if '\n' in document:
+                        settings = yaml.load(document)
+
+                        if 'parameters' in settings:
+                            self.mouth.put('Available parameters:')
+                            for key in settings['parameters'].keys():
+#                                if 'parameter.'+key in parameters:
+#                                    continue
+                                if 'default' not in settings['parameters'][key]:
+                                    raise ValueError("Parameter '{}' has no default value"
+                                                     .format(key))
+#                                parameters['parameter.'+key] = settings['parameters'][key]['default']
+                                self.mouth.put('- {}: {}'.format(key, settings['parameters'][key]['default']))
+#                        break
+        except IOError:
+            self.mouth.put("No template has this name. Double-check with the list command.")
 
     def do_prepare(self, parameters=None):
         if not self.context.get('worker.busy', False):

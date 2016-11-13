@@ -179,6 +179,32 @@ class SpeakerTests(unittest.TestCase):
         with self.assertRaises(Exception):
             inbox.get_nowait()
 
+    def test_do_parameters(self):
+
+        context = Context()
+        context.set('worker.template', 'category1/fittings1')
+        inbox = Queue()
+        mouth = Queue()
+        shell = Shell(context, inbox, mouth)
+
+        shell.do_parameters()
+        self.assertEqual(mouth.get(), "Available parameters:")
+        self.assertEqual(mouth.get(), "- cpuPerNode: 4")
+        self.assertEqual(mouth.get(), "- diskPerNode: 200")
+        self.assertEqual(mouth.get(), "- locationId: EU6")
+        self.assertEqual(mouth.get(), "- memoryPerNode: 12")
+        self.assertEqual(mouth.get(), "- domainName: HadoopClusterFox")
+        self.assertEqual(mouth.get(), "- networkName: HadoopClusterNetwork")
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
+
+        shell.do_parameters('category1/fittings2')
+        with self.assertRaises(Exception):
+            mouth.get_nowait()
+        with self.assertRaises(Exception):
+            inbox.get_nowait()
 
     def test_do_status(self):
 
