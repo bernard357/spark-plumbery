@@ -193,9 +193,9 @@ class SpeakerTests(unittest.TestCase):
         self.assertEqual(mouth.get(), "Available parameters:")
         self.assertEqual(mouth.get(), "- cpuPerNode: 4")
         self.assertEqual(mouth.get(), "- diskPerNode: 200")
+        self.assertEqual(mouth.get(), "- domainName: HadoopClusterFox")
         self.assertEqual(mouth.get(), "- locationId: EU6")
         self.assertEqual(mouth.get(), "- memoryPerNode: 12")
-        self.assertEqual(mouth.get(), "- domainName: HadoopClusterFox")
         self.assertEqual(mouth.get(), "- networkName: HadoopClusterNetwork")
         with self.assertRaises(Exception):
             mouth.get_nowait()

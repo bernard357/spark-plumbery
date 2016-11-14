@@ -166,7 +166,7 @@ class Shell(object):
 
                         if 'parameters' in settings:
                             self.mouth.put('Available parameters:')
-                            for key in settings['parameters'].keys():
+                            for key in sorted(settings['parameters'].keys()):
 #                                if 'parameter.'+key in parameters:
 #                                    continue
                                 if 'default' not in settings['parameters'][key]:
