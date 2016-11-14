@@ -18,8 +18,6 @@ class SpeakerTests(unittest.TestCase):
 
     def test_vocabulary(self):
 
-        logging.debug('*** Vocabulary test ***')
-
         inbox = Queue()
         mouth = Queue()
 

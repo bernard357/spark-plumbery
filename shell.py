@@ -66,14 +66,11 @@ class Shell(object):
         try:
             method = getattr(self, 'do_'+verb, None)
             if callable(method):
-                print("- processing command '{}'".format(line))
                 method(arguments)
             else:
-                print("- invalid command")
                 self.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
 
         except:
-            print("- unknown command")
             self.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
 
     def do_deploy(self, arguments=None):
@@ -142,20 +139,20 @@ class Shell(object):
         if count == 0:
             self.mouth.put("No template has been found in category '{}'".format(arguments))
 
-    def do_parameters(self, argument=None):
+    def do_parameters(self, arguments=None):
         root =  self.context.get('plumbery.fittings', '.')
         if not os.path.isdir(root):
             self.mouth.put("Invalid path for fittings. Check configuration")
             return
 
-        if argument is None or len(argument) < 1:
-            argument = self.context.get('worker.template', 'example/first')
+        if arguments is None or len(arguments) < 1:
+            arguments = self.context.get('worker.template', 'example/first')
 
-        if '/' not in argument:
+        if '/' not in arguments:
             self.mouth.put("Please indicate the category and the template that you want to use.")
             return
 
-        f_path = os.path.join(root,argument)
+        f_path = os.path.join(root,arguments)
         try:
             with open(os.path.join(f_path, 'fittings.yaml'), 'r') as handle:
                 plan = handle.read()
@@ -175,69 +172,69 @@ class Shell(object):
 #                                parameters['parameter.'+key] = settings['parameters'][key]['default']
                                 self.mouth.put('- {}: {}'.format(key, settings['parameters'][key]['default']))
                         else:
-                            self.mouth.put('No parameter for {}'.format(argument))
+                            self.mouth.put('No parameter for {}'.format(arguments))
                         break
                     else:
-                        self.mouth.put('No parameter for {}'.format(argument))
+                        self.mouth.put('No parameter for {}'.format(arguments))
         except IOError:
             self.mouth.put("No template has this name. Double-check with the list command.")
 
-    def do_prepare(self, argument=None):
+    def do_prepare(self, arguments=None):
         if not self.context.get('worker.busy', False):
             self.mouth.put("Ok, working on it")
         else:
             self.mouth.put("Ok, will work on it as soon as possible")
-        self.inbox.put(('prepare', argument))
+        self.inbox.put(('prepare', arguments))
 
-    def do_refresh(self, argument=None):
+    def do_refresh(self, arguments=None):
         if not self.context.get('worker.busy', False):
             self.mouth.put("Ok, working on it")
         else:
             self.mouth.put("Ok, will work on it as soon as possible")
-        self.inbox.put(('refresh', argument))
+        self.inbox.put(('refresh', arguments))
 
-    def do_start(self, argument=None):
+    def do_start(self, arguments=None):
         if not self.context.get('worker.busy', False):
             self.mouth.put("Ok, working on it")
         else:
             self.mouth.put("Ok, will work on it as soon as possible")
-        self.inbox.put(('start', argument))
+        self.inbox.put(('start', arguments))
 
-    def do_status(self, argument=None):
+    def do_status(self, arguments=None):
         self.mouth.put("Using {}".format(self.context.get('worker.template', 'example/first')))
         if self.context.get('worker.busy', False):
             self.mouth.put("On-going processing")
         else:
             self.mouth.put("Ready to process commands")
 
-    def do_stop(self, argument=None):
+    def do_stop(self, arguments=None):
         if not self.context.get('worker.busy', False):
             self.mouth.put("Ok, working on it")
         else:
             self.mouth.put("Ok, will work on it as soon as possible")
-        self.inbox.put(('stop', argument))
+        self.inbox.put(('stop', arguments))
 
-    def do_use(self, argument=None):
+    def do_use(self, arguments=None):
         root =  self.context.get('plumbery.fittings', '.')
         if not os.path.isdir(root):
             self.mouth.put("Invalid path for fittings. Check configuration")
             return
 
-        if argument is None:
+        if arguments is None:
             self.mouth.put("Please indicate the category and the template that you want to use.")
             return
 
-        if '/' not in argument:
+        if '/' not in arguments:
             self.mouth.put("Please indicate the category and the template that you want to use.")
             return
 
-        f_path = os.path.join(root,argument)
+        f_path = os.path.join(root,arguments)
         try:
             with open(os.path.join(f_path, 'fittings.yaml'), 'r') as f:
-                self.context.set('worker.template', argument)
+                self.context.set('worker.template', arguments)
                 self.mouth.put("This is well-noted")
         except IOError:
             self.mouth.put("No template has this name. Double-check with the list command.")
 
-    def do_version(self, argument=None):
+    def do_version(self, arguments=None):
         self.mouth.put("Version {}".format(self.context.get('plumby.version', '*unknown*')))
