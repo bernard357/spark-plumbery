@@ -70,7 +70,9 @@ class Shell(object):
             else:
                 self.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
 
-        except:
+        except Exception as feedback:
+            raise
+
             self.mouth.put("Sorry, I do not know how to handle '{}'".format(verb))
 
     def do_deploy(self, arguments=None):
@@ -99,24 +101,26 @@ class Shell(object):
 
     def do_list(self, arguments=None):
         root =  self.context.get('plumbery.fittings', '.')
+        url =  self.context.get('plumbery.fittings_url', 'None')
         if not os.path.isdir(root):
             self.mouth.put("Invalid path for fittings. Check configuration")
             return
 
         if arguments is None or len(arguments) == 0:
             count = 0
+            update=["You can list templates in following categories:"]
             for category in os.listdir(root):
                 c_path = os.path.join(root,category)
                 if not os.path.isdir(c_path):
                     continue
                 if category[0] == '.':
                     continue
-                if count == 0:
-                    self.mouth.put("You can list templates in following categories:")
                 count += 1
-                self.mouth.put("- {}".format(category))
+                update.append("- {}".format(category))
             if count == 0:
                 self.mouth.put("No category has been found. Check configuration")
+            else:
+                self.mouth.put({'markdown': '\n'.join(update)})
             return
 
         c_path = os.path.join(root,arguments)
@@ -125,19 +129,23 @@ class Shell(object):
             return
 
         count = 0
+        update=["You can use any of following templates:"]
         for fittings in os.listdir(c_path):
             f_path = os.path.join(c_path,fittings)
             try:
                 with open(os.path.join(f_path, 'fittings.yaml'), 'r') as f:
-                    if count == 0:
-                        self.mouth.put("You can use any of following templates:")
                     count += 1
-                    self.mouth.put("- {}".format(arguments+'/'+fittings))
+                    label = arguments+'/'+fittings
+                    if url:
+                        label = '['+label+']('+url+'/'+label+')'
+                    update.append("- {}".format(label))
             except IOError:
                 pass
 
         if count == 0:
             self.mouth.put("No template has been found in category '{}'".format(arguments))
+        else:
+            self.mouth.put({'markdown': '\n'.join(update)})
 
     def do_parameters(self, arguments=None):
         root =  self.context.get('plumbery.fittings', '.')
