@@ -463,4 +463,5 @@ if __name__ == "__main__":
     print("Starting web endpoint")
     run(host='0.0.0.0',
         port=context.get('server.port'),
-        debug=context.get('general.DEBUG'))
+        debug=context.get('general.DEBUG'),
+        server='cherrypy')
