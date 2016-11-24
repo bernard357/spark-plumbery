@@ -1,5 +1,5 @@
 bottle
-gevent
+cherrypy
 PyYAML
 requests
 requests_toolbelt

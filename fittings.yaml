@@ -47,6 +47,7 @@ blueprints:
                 - build-essential
                 - libssl-dev
                 - libffi-dev
+                - python-pycparser
 
               write_files:
 
@@ -121,11 +122,12 @@ blueprints:
                 - awk -f /root/hosts.awk /etc/hosts >/etc/hosts.new && mv /etc/hosts.new /etc/hosts
 
                 - echo "===== Installing Apache libcloud"
-                - pip install -e git+https://git-wip-us.apache.org/repos/asf/libcloud.git@trunk#egg=apache-libcloud
+                - pip install apache-libcloud
 
                 - echo "===== Installing plumbery"
+                - pip install backports.ssl_match_hostname
                 - pip install xmltodict
-                - pip install -e git+https://github.com/bernard357/plumbery.git@master#egg=plumbery
+                - pip install plumbery
 
                 - echo "===== Installing plumbery contrib"
                 - cd /home/ubuntu/
