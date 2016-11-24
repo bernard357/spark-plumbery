@@ -46,6 +46,10 @@ plumbery:
     #
     fittings: ../plumbery-contrib/fittings
 
+    # the external address for fittings plans
+    #
+    #fittings_url: "https://github.com/bernard357/plumbery-contrib/tree/master/fittings"
+
 # server settings
 #
 server:

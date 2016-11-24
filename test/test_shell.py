@@ -118,20 +118,14 @@ class SpeakerTests(unittest.TestCase):
         context.set('plumbery.fittings', os.path.dirname(os.path.realpath(__file__)))
 
         shell.do_list()
-        self.assertEqual(mouth.get(), "You can list templates in following categories:")
-        self.assertEqual(mouth.get(), "- category1")
-        self.assertEqual(mouth.get(), "- category2")
-        self.assertEqual(mouth.get(), "- category3_is_empty")
+        self.assertEqual(mouth.get(), {'markdown': 'You can list templates in following categories:\n- category1\n- category2\n- category3_is_empty'})
         with self.assertRaises(Exception):
             mouth.get_nowait()
         with self.assertRaises(Exception):
             inbox.get_nowait()
 
         shell.do_list('')
-        self.assertEqual(mouth.get(), "You can list templates in following categories:")
-        self.assertEqual(mouth.get(), "- category1")
-        self.assertEqual(mouth.get(), "- category2")
-        self.assertEqual(mouth.get(), "- category3_is_empty")
+        self.assertEqual(mouth.get(), {'markdown': 'You can list templates in following categories:\n- category1\n- category2\n- category3_is_empty'})
         with self.assertRaises(Exception):
             mouth.get_nowait()
         with self.assertRaises(Exception):
@@ -145,18 +139,14 @@ class SpeakerTests(unittest.TestCase):
             inbox.get_nowait()
 
         shell.do_list('category1')
-        self.assertEqual(mouth.get(), "You can use any of following templates:")
-        self.assertEqual(mouth.get(), "- category1/fittings1")
-        self.assertEqual(mouth.get(), "- category1/fittings2")
+        self.assertEqual(mouth.get(), {'markdown': 'You can use any of following templates:\n- category1/fittings1\n- category1/fittings2'})
         with self.assertRaises(Exception):
             mouth.get_nowait()
         with self.assertRaises(Exception):
             inbox.get_nowait()
 
         shell.do_list('category2')
-        self.assertEqual(mouth.get(), "You can use any of following templates:")
-        self.assertEqual(mouth.get(), "- category2/fittings1")
-        self.assertEqual(mouth.get(), "- category2/fittings2")
+        self.assertEqual(mouth.get(), {'markdown': 'You can use any of following templates:\n- category2/fittings1\n- category2/fittings2'})
         with self.assertRaises(Exception):
             mouth.get_nowait()
         with self.assertRaises(Exception):

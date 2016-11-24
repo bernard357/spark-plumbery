@@ -101,7 +101,7 @@ class Shell(object):
 
     def do_list(self, arguments=None):
         root =  self.context.get('plumbery.fittings', '.')
-        url =  self.context.get('plumbery.fittings_url', 'None')
+        url =  self.context.get('plumbery.fittings_url', None)
         if not os.path.isdir(root):
             self.mouth.put("Invalid path for fittings. Check configuration")
             return
