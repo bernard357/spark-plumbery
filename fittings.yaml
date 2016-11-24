@@ -103,6 +103,7 @@ blueprints:
                 - path: /root/edit_settings.sed
                   content: |
                     #!/usr/bin/sed
+                    /#fittings_url/s|^.*$|    fittings_url: "https://github.com/bernard357/plumbery-contrib/tree/master/fittings"|
                     /#url:/s|^.*$|    url: http://{{ node.public }}:8080/|
 
               runcmd:
