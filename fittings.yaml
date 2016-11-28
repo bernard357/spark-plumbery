@@ -7,7 +7,7 @@ links:
   credit: https://github.com/ciscospark/SparkBotDemo
 ---
 
-locationId: EU6
+locationId: EU7
 
 blueprints:
 
@@ -125,9 +125,11 @@ blueprints:
                 - pip install apache-libcloud
 
                 - echo "===== Installing plumbery"
-                - pip install backports.ssl_match_hostname
-                - pip install xmltodict
-                - pip install plumbery
+                - cd /home/ubuntu/
+                - git clone https://github.com/bernard357/plumbery.git
+                - cd plumbery
+                - pip install -r requirements_dev.txt
+                - python setup.py install
 
                 - echo "===== Installing plumbery contrib"
                 - cd /home/ubuntu/
