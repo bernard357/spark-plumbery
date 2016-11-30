@@ -122,6 +122,7 @@ blueprints:
                 - awk -f /root/hosts.awk /etc/hosts >/etc/hosts.new && mv /etc/hosts.new /etc/hosts
 
                 - echo "===== Installing Apache libcloud"
+                - pip install backports.ssl_match_hostname
                 - pip install apache-libcloud
 
                 - echo "===== Installing plumbery"
