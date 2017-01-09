@@ -81,3 +81,25 @@ Common plumby commands:
 * credentials to consume resources from the [Managed Cloud Platform](https://www.dimensiondata.com) from Dimension Data. If you are a Dimension Data employee, join on of the regional cloud teams to benefit from demonstration credentials
 * some instructions and goodwill :-)
 
+## Where to find additional assistance?
+
+Well, maybe you would like to check [Frequently asked questions](docs/questions.md) and related responses.
+Then you can [raise an issue at the GitHub project page](https://github.com/bernard357/spark-plumbery/issues) and get support from the project team.
+
+If you are a Dimension Data employee, reach out the Green Force group at Yammer and engage with
+other digital practitioners.
+
+## How would you like to contribute?
+
+We want you to feel as comfortable as possible with this project, whatever your skills are.
+Here are some ways to contribute:
+
+* [use it for yourself](docs/contributing.md#how-to-use-this-project-for-yourself)
+* [communicate about the project](docs/contributing.md#how-to-communicate-about-the-project)
+* [submit feedback](docs/contributing.md#how-to-submit-feedback)
+* [report a bug](docs/contributing.md#how-to-report-a-bug)
+* [write or fix documentation](docs/contributing.md#how-to-improve-the-documentation)
+* [fix a bug or an issue](docs/contributing.md#how-to-fix-a-bug)
+* [implement some feature](docs/contributing.md#how-to-implement-new-features)
+
+Every [contribution and feedback](docs/contributing.md) matters, so thank you for your efforts.
