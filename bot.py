@@ -464,4 +464,4 @@ if __name__ == "__main__":
     run(host='0.0.0.0',
         port=context.get('server.port'),
         debug=context.get('general.DEBUG'),
-        server='cherrypy')
+        server='paste')
